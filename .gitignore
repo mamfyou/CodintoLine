@@ -1,0 +1,9 @@
+/.idea/
+/venv/
+/db.sqlite3/
+/staticfiles/
+/templates/
+*.xml
+*.iml
+*.pyc
+*/migrations/*

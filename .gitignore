@@ -7,3 +7,6 @@
 *.iml
 *.pyc
 */migrations/*
+.env
+db.sqlite3
+Untitled Diagram(13)(1).jpg

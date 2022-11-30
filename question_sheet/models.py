@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -30,6 +32,7 @@ class QuestionSheet(models.Model):
         ('en', 'English'),
         ('fa', 'Persian'),
     )
+    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES)
     name = models.CharField(max_length=100)
     user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)

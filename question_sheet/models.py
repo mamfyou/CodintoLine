@@ -32,13 +32,13 @@ class QuestionSheet(models.Model):
         ('en', 'English'),
         ('fa', 'Persian'),
     )
-    uid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, blank=True, default='Untitled')
     user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField(auto_now_add=True)
-    end_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
     duration = models.DurationField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     has_progress_bar = models.BooleanField(default=False)

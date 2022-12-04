@@ -40,8 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'debug_toolbar',
+    'rest_framework',
+    'generic_relations',
 
     'question_sheet',
+    'question',
 
 ]
 

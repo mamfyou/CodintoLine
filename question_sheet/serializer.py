@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from question_sheet.models import QuestionSheet
+from question_sheet.models import QuestionSheet, Question
 
 
 class QuestionSheetSerializer(serializers.ModelSerializer):
@@ -12,3 +12,9 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
         validated_data['user'] = self.context['request'].user
         validated_data['name'] = "Untitled"
         return super().create(validated_data)
+
+
+class QuestionSheetQuestionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = '__all__'

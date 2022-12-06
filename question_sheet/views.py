@@ -1,9 +1,11 @@
-from django.shortcuts import render
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, \
+    ListModelMixin
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
-from question_sheet.models import QuestionSheet
+from rest_framework.viewsets import GenericViewSet
+
+from question_sheet.models import QuestionSheet, Question
 from question_sheet.serializer import QuestionSheetSerializer
 
 
@@ -21,3 +23,10 @@ class QuestionSheetViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin,
         headers = self.get_success_headers(serializer.data)
         return Response({'id': serializer.data['id']}, status=status.HTTP_201_CREATED, headers=headers)
 
+
+class QuestionSheetQuestions(GenericViewSet, ListModelMixin):
+    def get_queryset(self):
+        return Question.objects.filter(question_parent=ContentType.objects.get_for_model(QuestionSheet),
+                                       question_parent__id=self.kwargs['pk'])
+
+    serializer_class = QuestionSheetSerializer

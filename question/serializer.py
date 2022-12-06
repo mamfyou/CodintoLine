@@ -32,6 +32,7 @@ class TxtWithAnsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('الگو نمونه نمیتواند خالی باشد!')
         elif validation.get('kind') != 'text' and attrs['validation'].get('evaluation_message') is None:
             raise serializers.ValidationError('پیام اعتبارسنجی نمیتواند خالی باشد!')
+
         return attrs
 
 

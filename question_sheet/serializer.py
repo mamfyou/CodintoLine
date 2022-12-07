@@ -6,7 +6,8 @@ from question_sheet.models import QuestionSheet, Question
 class QuestionSheetSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionSheet
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'language', 'start_date', 'end_date', 'duration',
+                  'is_active', 'has_progress_bar', 'is_one_question_each_page']
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user

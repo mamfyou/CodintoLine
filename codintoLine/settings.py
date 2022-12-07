@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'rest_framework',
     'generic_relations',
+    'rest_framework_nested',
 
     'question_sheet',
     'question',

@@ -18,3 +18,5 @@ class QuestionSheetQuestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = '__all__'
+
+    # not configured

@@ -30,3 +30,4 @@ class QuestionSheetQuestions(GenericViewSet, ListModelMixin):
                                        question_parent__id=self.kwargs['pk'])
 
     serializer_class = QuestionSheetSerializer
+    # serializer is not configured

@@ -183,3 +183,9 @@ class QuestionParentSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionContentType
         fields = ['id', 'content_type']
+
+    # not configured
+
+#
+# SERIALIZER FOR CONTENT TYPE FIELD IS NOT CONFIGURED
+#

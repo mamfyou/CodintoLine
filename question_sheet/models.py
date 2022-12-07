@@ -37,7 +37,7 @@ class QuestionSheet(models.Model):
     name = models.CharField(max_length=100, blank=True, default='Untitled')
     user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
-    start_date = models.DateField(auto_now_add=True)
+    start_date = models.DateField(auto_created=True)
     end_date = models.DateField(null=True, blank=True)
     duration = models.DurationField(null=True, blank=True)
     is_active = models.BooleanField(default=True)

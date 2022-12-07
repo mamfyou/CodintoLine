@@ -11,9 +11,9 @@ BUTTON_SHAPE = (('1', 'First'), ('2', 'Second'), ('3', 'Third'), ('4', 'Fourth')
 class Range(models.Model):
     start_range_at = models.PositiveIntegerField()
     end_range_at = models.PositiveIntegerField()
-    first_tag = models.CharField(max_length=50)
-    mid_tag = models.CharField(max_length=50)
-    end_tag = models.CharField(max_length=50)
+    first_tag = models.CharField(max_length=50, blank=True, null=True)
+    mid_tag = models.CharField(max_length=50, blank=True, null=True)
+    end_tag = models.CharField(max_length=50, blank=True, null=True)
     has_zero = models.BooleanField(default=False)
 
 

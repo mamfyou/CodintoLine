@@ -65,10 +65,10 @@ class TextSerializer(serializers.ModelSerializer):
 class NumberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Number
-        fields = ['id', 'min_number', 'max_number', 'has_decimal', 'has_negative']
+        fields = ['id', 'min_num', 'max_num', 'has_decimal', 'has_negative']
 
     def validate(self, attrs):
-        if attrs.get('min_number') > attrs.get('max_number'):
+        if attrs.get('min_num') > attrs.get('max_num'):
             raise serializers.ValidationError('حداقل مقدار نمیتواند بیشتر از حداکثر مقدار باشد!')
         return attrs
 
@@ -116,13 +116,17 @@ class GradingSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs.get('start_grade_at') > attrs.get('end_grade_at'):
             raise serializers.ValidationError('مقدار شروع بازه نمیتواند بزرگتر یا مساوی مقدار پایان بازه باشد!')
+        elif attrs.get('icon') is not None and attrs.get('icon').size >= 3000000:
+            raise serializers.ValidationError('حجم آیکون نمیتواند بیشتر از 3 مگابایت باشد!')
+        elif attrs.get('icon') is not None and attrs.get('icon').content_type != 'PNG':
+            raise serializers.ValidationError('فرمت آیکون باید PNG باشد!')
         return attrs
 
 
 class PrioritizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prioritization
-        fields = ['id', 'options', 'options_pic', 'is_alphabet_order', 'is_random_order']
+        fields = ['id', 'options', 'options_pic', 'is_alphabetic_order', 'is_random_order']
 
     def validate(self, attrs):
         if attrs.get('options') is None and attrs.get('options_pic') is None:
@@ -135,8 +139,8 @@ class PrioritizationSerializer(serializers.ModelSerializer):
 class MultiChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = MultiChoice
-        fields = ['id', 'options', 'options_pic', 'min_selection', 'max_selection', 'is_extra_action', 'extra_action',
-                  'is_alphabet_order', 'is_random_order', 'is_vertical_order', 'is_2x_picture', 'is_select_all']
+        fields = ['id', 'options', 'options_pic', 'min_selection', 'max_selection', 'is_extra_action', 'extra_actions',
+                  'is_alphabetic_order', 'is_random_order', 'is_vertical_display', 'is_2x_picture', 'is_select_all']
 
     is_extra_action = serializers.BooleanField(required=False)
 
@@ -145,7 +149,7 @@ class MultiChoiceSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('گزینه ها نمیتواند خالی باشد!')
         elif attrs.get('min_selection') > attrs.get('max_selection'):
             raise serializers.ValidationError('حداقل انتخاب نمیتواند بیشتر از حداکثر انتخاب باشد!')
-        elif attrs.get('extra_action') is None and attrs.get('is_extra_action') is True:
+        elif attrs.get('extra_actions') is None and attrs.get('is_extra_action') is True:
             raise serializers.ValidationError('عملیات اضافی نمیتواند خالی باشد!')
         elif len(attrs['options']) + len(attrs['options_pic']) <= 1:
             raise serializers.ValidationError('تعداد گزینه ها باید بیشتر از یک باشد!')

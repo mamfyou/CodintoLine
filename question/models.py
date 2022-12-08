@@ -1,8 +1,7 @@
-from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-
-from question_sheet.models import Question, QuestionFields
 
 # Create your models here.
 BUTTON_SHAPE = (('1', 'First'), ('2', 'Second'), ('3', 'Third'), ('4', 'Fourth'), ('5', 'Fifth'), ('6', 'Sixth'))
@@ -64,7 +63,6 @@ class GroupQuestions(models.Model):
     button_shape = models.CharField(max_length=20, choices=BUTTON_SHAPE, null=True, blank=True)
     button_text = models.CharField(max_length=50, null=True, blank=True)
     is_random_order = models.BooleanField(default=False)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='group_questions')
 
 
 class Prioritization(models.Model):
@@ -100,3 +98,7 @@ class ThanksPage(models.Model):
     has_whatsapp = models.BooleanField(default=False)
     has_instagram = models.BooleanField(default=False)
     has_soroush = models.BooleanField(default=False)
+
+
+
+

@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from question.models import TextWithAnswer, Range, Link, Text, Number, Email, File, DrawerList, Grading, Prioritization, \
     MultiChoice, GroupQuestions, WelcomePage, ThanksPage
-from question_sheet.models import QuestionSheet, QuestionContentType
+from question_sheet.models import QuestionSheet
 
 
 class TxtWithAnsSerializer(serializers.ModelSerializer):
@@ -159,7 +159,7 @@ class MultiChoiceSerializer(serializers.ModelSerializer):
 class GroupQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupQuestions
-        fields = ['id', 'button_shape', 'button_text', 'is_random_order', 'question']
+        fields = ['id', 'button_shape', 'button_text', 'is_random_order']
 
 
 class WelcomePageSerializer(serializers.ModelSerializer):
@@ -173,19 +173,8 @@ class ThanksPageSerializer(serializers.ModelSerializer):
         model = ThanksPage
         fields = ['id', 'link', 'has_social_link', 'has_eitaa', 'has_soroush', 'has_telegram', 'has_instagram',
                   'has_whatsapp']
-        # read_only_fields = ['link']
 
     link = serializers.HyperlinkedRelatedField(queryset=QuestionSheet.objects.all(),
                                                view_name='question-sheet-detail')
 
 
-class QuestionParentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = QuestionContentType
-        fields = ['id', 'content_type']
-
-    # not configured
-
-#
-# SERIALIZER FOR CONTENT TYPE FIELD IS NOT CONFIGURED
-#

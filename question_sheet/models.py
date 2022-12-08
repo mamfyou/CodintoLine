@@ -4,28 +4,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-#
-#
-# class QuestionContentType(models.Model):
-#     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,
-#                                      limit_choices_to={'model__in': ('QuestionSheet', 'GroupQuestion')})
-#     object_id = models.PositiveIntegerField()
-#     content_object = GenericForeignKey('content_type', 'object_id')
-#
-#
-# class QuestionFields(models.Model):
-#     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='question_fields',
-#                                      limit_choices_to={'model__in': (
-#                                          'Range', 'Number', 'DropDownList', 'MultiChoice', 'Link', 'Email', 'File',
-#                                          'Grading', 'Prioritization',
-#                                          'TextWithAnswer', 'Text', 'WelcomePage', 'ThanksPage', 'GroupQuestions')})
-#
-#     object_id = models.PositiveIntegerField()
-#     content_object = GenericForeignKey('content_type', 'object_id')
-#
-#     unique_together = ('content_type', 'object_id')
-#
-#
+
+
 class QuestionSheet(models.Model):
     LANGUAGE_CHOICES = (
         ('ar', 'Arabic'),
@@ -45,23 +25,7 @@ class QuestionSheet(models.Model):
 
     def __str__(self):
         return self.name
-#
-#
-# class Question(models.Model):
-#     QUESTION_KINDS = (
-#         ('rng', 'Range'), ('num', 'Number'), ('ddlist', 'DropDownList'), ('mulch', 'MultiChoice'), ('link', 'Link'),
-#         ('email', 'Email'), ('file', 'File'), ('grd', 'Grading'), ('prior', 'Prioritization'),
-#         ('txtwa', 'TextWithAnswer'), ('txt', 'Text'), ('wel', 'WelcomePage'), ('thanks', 'ThanksPage'),
-#         ('gq', 'GroupQuestions')
-#     )
-#     kind = models.CharField(max_length=100, choices=QUESTION_KINDS)
-#     title = models.CharField(max_length=255)
-#     description = models.TextField(max_length=500, null=True, blank=True)
-#     is_required = models.BooleanField(default=False)
-#     has_question_num = models.BooleanField(default=False)
-#     question_parent = GenericRelation(QuestionContentType, related_query_name='question_parent')
-#     question_fields = GenericRelation(QuestionFields, related_query_name='question_fields')
-#     media = models.FileField(upload_to='media/', null=True, blank=True)
+
 
 class Question(models.Model):
     title = models.CharField(max_length=255)
@@ -69,7 +33,8 @@ class Question(models.Model):
     is_required = models.BooleanField(default=False)
     has_question_num = models.BooleanField(default=False)
     media = models.FileField(upload_to='media/', null=True, blank=True)
-    parent_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in': ('questionsheet', 'groupquestions')})
+    parent_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,
+                                    limit_choices_to={'model__in': ('questionsheet', 'groupquestions')})
     parent_id = models.PositiveIntegerField()
     parent = GenericForeignKey('parent_type', 'parent_id')
 
@@ -79,7 +44,9 @@ class Question(models.Model):
 
 class QuestionItem(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    field_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in': ('range', 'number', 'link', 'email', 'text', 'file', 'textwithanswer', 'drawerlist', 'grading', 'groupquestions', 'prioritization', 'multichoice', 'welcomepage', 'thankspage')})
+    field_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in': (
+        'range', 'number', 'link', 'email', 'text', 'file', 'textwithanswer', 'drawerlist', 'grading', 'groupquestions',
+        'prioritization', 'multichoice', 'welcomepage', 'thankspage')})
     field_object_id = models.PositiveIntegerField()
     field_object = GenericForeignKey('field_type', 'field_object_id')
     unique_together = ('question', 'field_type', 'field_object_id')

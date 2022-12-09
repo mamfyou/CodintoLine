@@ -1,7 +1,5 @@
-import uuid
-
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
@@ -49,7 +47,9 @@ class QuestionItem(models.Model):
         'prioritization', 'multichoice', 'welcomepage', 'thankspage')})
     field_object_id = models.PositiveIntegerField()
     field_object = GenericForeignKey('field_type', 'field_object_id')
-    unique_together = ('question', 'field_type', 'field_object_id')
+
+    class Meta:
+        unique_together = ('question', 'field_type', 'field_object_id')
 
     def __str__(self):
         return self.question.title

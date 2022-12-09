@@ -2,9 +2,8 @@ import re
 
 from rest_framework import serializers
 
-from question.models import TextWithAnswer, Range, Link, Text, Number, Email, File, DrawerList, Grading, Prioritization, \
+from question_sheet.models.question_models import TextWithAnswer, Range, Link, Text, Number, Email, File, DrawerList, Grading, Prioritization, \
     MultiChoice, GroupQuestions, WelcomePage, ThanksPage
-from question_sheet.models import QuestionSheet
 
 
 class TxtWithAnsSerializer(serializers.ModelSerializer):
@@ -174,7 +173,7 @@ class ThanksPageSerializer(serializers.ModelSerializer):
         fields = ['id', 'link', 'has_social_link', 'has_eitaa', 'has_soroush', 'has_telegram', 'has_instagram',
                   'has_whatsapp']
 
-    link = serializers.HyperlinkedRelatedField(queryset=QuestionSheet.objects.all(),
-                                               view_name='question-sheet-detail')
+    # link = serializers.HyperlinkedRelatedField(queryset=QuestionSheet.objects.all(),
+    #                                            view_name='question-sheet-detail')
 
 

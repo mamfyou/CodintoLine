@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'rest_framework_nested',
 
     'question_sheet',
-    'question',
 
 ]
 

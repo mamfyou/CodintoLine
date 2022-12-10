@@ -1,43 +1,34 @@
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
+
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from generic_relations.relations import GenericRelatedField
 
-from question_sheet.serializers.question_serializer import *
 from question_sheet.models.qsheet_models import Question, QuestionItem, QuestionSheet
+from question_sheet.serializers.question_serializer import *
 
-User = get_user_model()
 
-
-# SERIALIZER_DICT = {
-#     'range': RangeSerializer,
-#     'number': NumberSerializer,
-#     'link': LinkSerializer,
-#     'email': EmailSerializer,
-#     'text': TextSerializer,
-#     'file': FileSerializer,
-#     'textwithanswer': TxtWithAnsSerializer,
-#     'drawerlist': DrawerListSerializer,
-#     'grading': GradingSerializer,
-#     'groupquestions': GroupQuestionSerializer,
-#     'prioritization': PrioritizationSerializer,
-#     'multichoice': MultiChoiceSerializer,
-#     'welcomepage': WelcomePageSerializer,
-#     'thankspage: ': ThanksPageSerializer,
-# }
+# User = get_user_model()
 
 
 class GenericMamfRelatedField(GenericRelatedField):
 
-    def to_internal_value(self, data):
-        try:
-            content_type = ContentType.objects.get(id=self.context['request'].data['field_type'])
-            for serializer in self.serializers.values():
-                if serializer.Meta.model == content_type:
-                    return serializer.to_internal_value(data)
-        except ImproperlyConfigured as e:
-            raise serializers.ValidationError(e)
+    def get_deserializer_for_data(self, value):
+        serializerss = []
+        for serializer in self.serializers.values():
+            if ContentType.objects.get_for_model(serializer.Meta.model).id == \
+                    self.context['request'].data['field_type']:
+                try:
+                    serializer.to_internal_value(value)
+                    serializerss.append(serializer)
+                except Exception:
+                    pass
+        l = len(serializerss)
+        if l < 1:
+            raise ImproperlyConfigured(
+                'Could not determine a valid serializer for value %r.' % value)
+        return serializerss[0]
 
 
 class QuestionSheetSerializer(serializers.ModelSerializer):
@@ -54,7 +45,11 @@ class QuestionSerializer(serializers.ModelSerializer):
                   'parent']
 
 
-class QuestionItemSerializer(WritableNestedModelSerializer):
+class QuestionItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionItem
+        fields = ['question', 'field_object', 'field_type']
+
     field_object = GenericMamfRelatedField({
         TextWithAnswer: TxtWithAnsSerializer(),
         Range: RangeSerializer(),
@@ -71,8 +66,15 @@ class QuestionItemSerializer(WritableNestedModelSerializer):
         WelcomePage: WelcomePageSerializer(),
         ThanksPage: ThanksPageSerializer(),
     })
+
     question = QuestionSerializer()
 
-    class Meta:
-        model = QuestionItem
-        fields = ['question', 'field_object', 'field_type']
+    def create(self, validated_data):
+        question_data = validated_data.pop('question')
+        field_object_data = validated_data.pop('field_object')
+        field_type_data = validated_data.pop('field_type').id
+        the_class = ContentType.objects.get(id=field_type_data).model_class()
+        question = Question.objects.create(**question_data)
+        field_object = the_class.objects.create(**field_object_data)
+        question_item = QuestionItem.objects.create(question=question, field_object=field_object, **validated_data)
+        return question_item

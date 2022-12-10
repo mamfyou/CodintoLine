@@ -5,7 +5,7 @@ from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer,
 
 
 class QuestionItemViewSet(ModelViewSet):
-    queryset = QuestionItem.objects.all()
+    queryset = QuestionItem.objects.select_related('question').all()
     serializer_class = QuestionItemSerializer
 
     def get_serializer_context(self):
@@ -15,5 +15,3 @@ class QuestionItemViewSet(ModelViewSet):
 class QuestionSheetViewSet(ModelViewSet):
     queryset = QuestionSheet.objects.all()
     serializer_class = QuestionSheetSerializer
-
-

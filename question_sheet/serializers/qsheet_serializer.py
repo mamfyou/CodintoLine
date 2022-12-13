@@ -46,6 +46,12 @@ class GenericMamfRelatedField(GenericRelatedField):
                 'Could not determine a valid serializer for value %r.' % value)
         return serializerss[0]
 
+    def get_serializer_for_instance(self, instance):
+        serializerss = []
+        for serializer in self.serializers.values():
+            if isinstance(instance, serializer.Meta.model):
+                return serializer
+
 
 class QuestionSheetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,7 +70,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 class QuestionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionItem
-        fields = ['id', 'field_type', 'field_object', 'field__object', 'question']
+        fields = ['id', 'field_type', 'field_object', 'question']
 
     field_object = GenericMamfRelatedField({
         TextWithAnswer: TxtWithAnsSerializer(),
@@ -81,15 +87,9 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         GroupQuestions: GroupQuestionSerializer(),
         WelcomePage: WelcomePageSerializer(),
         ThanksPage: ThanksPageSerializer(),
-    }, write_only=True)
+    })
 
     question = QuestionSerializer()
-    field__object = serializers.SerializerMethodField(method_name='get_field_object')
-
-    def get_field_object(self, obj):
-        for key, value in SERIALIZER_DICT.items():
-            if isinstance(obj.field_object, key):
-                return value.to_representation(obj.field_object)
 
     def create(self, validated_data):
         question_data = validated_data.pop('question')

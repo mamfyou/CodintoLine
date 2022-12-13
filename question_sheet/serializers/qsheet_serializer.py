@@ -1,31 +1,9 @@
-from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
-
-from drf_writable_nested.serializers import WritableNestedModelSerializer
 from generic_relations.relations import GenericRelatedField
 
 from question_sheet.models.qsheet_models import Question, QuestionItem, QuestionSheet
 from question_sheet.serializers.question_serializer import *
-
-# User = get_user_model()
-
-SERIALIZER_DICT = {
-    TextWithAnswer: TxtWithAnsSerializer(),
-    Range: RangeSerializer(),
-    Link: LinkSerializer(),
-    Text: TextSerializer(),
-    Number: NumberSerializer(),
-    Email: EmailSerializer(),
-    File: FileSerializer(),
-    DrawerList: DrawerListSerializer(),
-    Grading: GradingSerializer(),
-    Prioritization: PrioritizationSerializer(),
-    MultiChoice: MultiChoiceSerializer(),
-    GroupQuestions: GroupQuestionSerializer(),
-    WelcomePage: WelcomePageSerializer(),
-    ThanksPage: ThanksPageSerializer(),
-}
 
 
 class GenericMamfRelatedField(GenericRelatedField):
@@ -47,10 +25,10 @@ class GenericMamfRelatedField(GenericRelatedField):
         return serializerss[0]
 
     def get_serializer_for_instance(self, instance):
-        serializerss = []
         for serializer in self.serializers.values():
             if isinstance(instance, serializer.Meta.model):
                 return serializer
+        raise serializers.ValidationError('Could not determine a valid serializer for instance %r.' % instance)
 
 
 class QuestionSheetSerializer(serializers.ModelSerializer):

@@ -8,8 +8,24 @@ from generic_relations.relations import GenericRelatedField
 from question_sheet.models.qsheet_models import Question, QuestionItem, QuestionSheet
 from question_sheet.serializers.question_serializer import *
 
-
 # User = get_user_model()
+
+SERIALIZER_DICT = {
+    TextWithAnswer: TxtWithAnsSerializer(),
+    Range: RangeSerializer(),
+    Link: LinkSerializer(),
+    Text: TextSerializer(),
+    Number: NumberSerializer(),
+    Email: EmailSerializer(),
+    File: FileSerializer(),
+    DrawerList: DrawerListSerializer(),
+    Grading: GradingSerializer(),
+    Prioritization: PrioritizationSerializer(),
+    MultiChoice: MultiChoiceSerializer(),
+    GroupQuestions: GroupQuestionSerializer(),
+    WelcomePage: WelcomePageSerializer(),
+    ThanksPage: ThanksPageSerializer(),
+}
 
 
 class GenericMamfRelatedField(GenericRelatedField):
@@ -48,7 +64,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 class QuestionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionItem
-        fields = ['question', 'field_object', 'field_type']
+        fields = ['id', 'field_type', 'field_object', 'field__object', 'question']
 
     field_object = GenericMamfRelatedField({
         TextWithAnswer: TxtWithAnsSerializer(),
@@ -65,9 +81,15 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         GroupQuestions: GroupQuestionSerializer(),
         WelcomePage: WelcomePageSerializer(),
         ThanksPage: ThanksPageSerializer(),
-    })
+    }, write_only=True)
 
     question = QuestionSerializer()
+    field__object = serializers.SerializerMethodField(method_name='get_field_object')
+
+    def get_field_object(self, obj):
+        for key, value in SERIALIZER_DICT.items():
+            if isinstance(obj.field_object, key):
+                return value.to_representation(obj.field_object)
 
     def create(self, validated_data):
         question_data = validated_data.pop('question')

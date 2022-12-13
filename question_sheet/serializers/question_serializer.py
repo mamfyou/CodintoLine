@@ -172,8 +172,3 @@ class ThanksPageSerializer(serializers.ModelSerializer):
         model = ThanksPage
         fields = ['id', 'link', 'has_social_link', 'has_eitaa', 'has_soroush', 'has_telegram', 'has_instagram',
                   'has_whatsapp']
-
-    # link = serializers.HyperlinkedRelatedField(queryset=QuestionSheet.objects.all(),
-    #                                            view_name='question-sheet-detail')
-
-

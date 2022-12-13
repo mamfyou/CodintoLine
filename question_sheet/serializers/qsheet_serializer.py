@@ -34,8 +34,11 @@ class GenericMamfRelatedField(GenericRelatedField):
 class QuestionSheetSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionSheet
-        fields = ['id', 'language', 'name', 'user', 'created', 'start_date', 'end_date', 'duration', 'is_active',
+        fields = ['id', 'language', 'name', 'start_date', 'end_date', 'duration',
                   'has_progress_bar', 'is_one_question_each_page']
+
+    def create(self, validated_data):
+        return QuestionSheet.objects.create(user=self.context['request'].user, **validated_data)
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -43,6 +46,22 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ['id', 'title', 'description', 'is_required', 'has_question_num', 'media', 'parent_type', 'parent_id',
                   'parent']
+
+    def validate(self, attrs):
+        if attrs.get('title') is None:
+            raise serializers.ValidationError('متن سوال اجباری است!')
+        elif attrs.get('title') == '':
+            raise serializers.ValidationError('متن سوال اجباری است!')
+        elif len(attrs.get('title')) < 5:
+            raise serializers.ValidationError('متن سوال باید حداقل 5 کاراکتر باشد!')
+        elif attrs.get('media').size > 2097152:
+            raise serializers.ValidationError('حجم فایل باید کمتر از 20 مگابایت باشد!')
+        elif attrs.get('media').content_type not in ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml',
+                                                     'image/webp', 'video/mp4', 'video/ogg', 'video/webm']:
+            raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
+        elif attrs.get('parent_type') is None:
+            raise serializers.ValidationError('نوع والد سوال اجباری است!')
+        return attrs
 
 
 class QuestionItemSerializer(serializers.ModelSerializer):
@@ -79,18 +98,13 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         question_item = QuestionItem.objects.create(question=question, field_object=field_object, **validated_data)
         return question_item
 
-    def validate(self, attrs):
-        print(attrs)
-        if attrs['question'].get('title') is None:
-            raise serializers.ValidationError('متن سوال اجباری است!')
-        elif attrs['question'].get('description') is None:
-            raise serializers.ValidationError('توضیحات سوال اجباری است!')
-        elif attrs['question'].get('parent_type') is None:
+    def validate(self, data):
+        if data.get('field_type') is None:
             raise serializers.ValidationError('نوع سوال اجباری است!')
-        elif attrs['question'].get('parent_id') is None:
-            raise serializers.ValidationError('شناسه سوال اجباری است!')
-        elif attrs.get('field_type') is None:
-            raise serializers.ValidationError('نوع سوال اجباری است!')
-        elif attrs.get('field_object') is None:
-            raise serializers.ValidationError('فیلد های اضافه سوال اجباری است!')
-        return attrs
+        elif data.get('field_type') not in ContentType.objects.all():
+            raise serializers.ValidationError('نوع سوال اشتباه است!')
+        elif data.get('question') is None:
+            raise serializers.ValidationError('سوال اجباری است!')
+        elif data.get('field_object') is None:
+            raise serializers.ValidationError('محتوای سوال اجباری است!')
+        return data

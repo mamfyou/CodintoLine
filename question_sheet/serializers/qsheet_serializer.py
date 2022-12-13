@@ -78,3 +78,19 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         field_object = the_class.objects.create(**field_object_data)
         question_item = QuestionItem.objects.create(question=question, field_object=field_object, **validated_data)
         return question_item
+
+    def validate(self, attrs):
+        print(attrs)
+        if attrs['question'].get('title') is None:
+            raise serializers.ValidationError('متن سوال اجباری است!')
+        elif attrs['question'].get('description') is None:
+            raise serializers.ValidationError('توضیحات سوال اجباری است!')
+        elif attrs['question'].get('parent_type') is None:
+            raise serializers.ValidationError('نوع سوال اجباری است!')
+        elif attrs['question'].get('parent_id') is None:
+            raise serializers.ValidationError('شناسه سوال اجباری است!')
+        elif attrs.get('field_type') is None:
+            raise serializers.ValidationError('نوع سوال اجباری است!')
+        elif attrs.get('field_object') is None:
+            raise serializers.ValidationError('فیلد های اضافه سوال اجباری است!')
+        return attrs

@@ -1,6 +1,8 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
+from question_sheet.models.qsheet_models import QuestionSheet
+
 # Create your models here.
 BUTTON_SHAPE = (('1', 'First'), ('2', 'Second'), ('3', 'Third'), ('4', 'Fourth'), ('5', 'Fifth'), ('6', 'Sixth'))
 
@@ -89,14 +91,10 @@ class WelcomePage(models.Model):
 
 
 class ThanksPage(models.Model):
-    link = models.URLField(null=True, blank=True)
+    short_url_uuid = models.CharField(unique=True, editable=False, max_length=255)
     has_social_link = models.BooleanField(default=False)
     has_eitaa = models.BooleanField(default=False)
     has_telegram = models.BooleanField(default=False)
     has_whatsapp = models.BooleanField(default=False)
     has_instagram = models.BooleanField(default=False)
     has_soroush = models.BooleanField(default=False)
-
-
-
-

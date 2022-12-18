@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -5,6 +7,7 @@ from django.db import models
 
 
 class QuestionSheet(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, auto_created=True)
     LANGUAGE_CHOICES = (
         ('ar', 'Arabic'),
         ('en', 'English'),

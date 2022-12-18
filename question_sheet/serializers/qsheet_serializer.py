@@ -54,11 +54,12 @@ class QuestionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('متن سوال اجباری است!')
         elif len(attrs.get('title')) < 5:
             raise serializers.ValidationError('متن سوال باید حداقل 5 کاراکتر باشد!')
-        elif attrs.get('media').size > 2097152:
-            raise serializers.ValidationError('حجم فایل باید کمتر از 20 مگابایت باشد!')
-        elif attrs.get('media').content_type not in ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml',
-                                                     'image/webp', 'video/mp4', 'video/ogg', 'video/webm']:
-            raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
+        elif attrs.get('media') is not None:
+            if attrs.get('media').size > 2097152:
+                raise serializers.ValidationError('حجم فایل باید کمتر از 20 مگابایت باشد!')
+            elif attrs.get('media').content_type not in ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml',
+                                                         'image/webp', 'video/mp4', 'video/ogg', 'video/webm']:
+                raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
         elif attrs.get('parent_type') is None:
             raise serializers.ValidationError('نوع والد سوال اجباری است!')
         return attrs
@@ -94,13 +95,19 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         field_type_data = validated_data.pop('field_type').id
         the_class = ContentType.objects.get(id=field_type_data).model_class()
         question = Question.objects.create(**question_data)
-        field_object = the_class.objects.create(**field_object_data)
+        if field_type_data == ContentType.objects.get_for_model(ThanksPage).id:
+            field_object = the_class.objects.create(short_url_uuid=self.context['pk'], **field_object_data)
+        else:
+            field_object = the_class.objects.create(**field_object_data)
         question_item = QuestionItem.objects.create(question=question, field_object=field_object, **validated_data)
         return question_item
 
     def validate(self, data):
         if data.get('field_type') is None:
             raise serializers.ValidationError('نوع سوال اجباری است!')
+        elif data.get('field_type').id == ContentType.objects.get_for_model(ThanksPage).id:
+            if ThanksPage.objects.filter(short_url_uuid=self.context['pk']).exists():
+                raise serializers.ValidationError('صفحه تشکر برای این سوالنامه قبلا ایجاد شده است!')
         elif data.get('field_type') not in ContentType.objects.all():
             raise serializers.ValidationError('نوع سوال اشتباه است!')
         elif data.get('question') is None:

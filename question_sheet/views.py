@@ -11,7 +11,7 @@ class QuestionItemViewSet(ModelViewSet):
     serializer_class = QuestionItemSerializer
 
     def get_serializer_context(self):
-        return {'request': self.request}
+        return {'request': self.request, 'pk': self.kwargs.get('questionSheet_pk')}
 
 
 class QuestionSheetViewSet(ModelViewSet):

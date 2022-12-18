@@ -2,7 +2,8 @@ import re
 
 from rest_framework import serializers
 
-from question_sheet.models.question_models import TextWithAnswer, Range, Link, Text, Number, Email, File, DrawerList, Grading, Prioritization, \
+from question_sheet.models.question_models import TextWithAnswer, Range, Link, Text, Number, Email, File, DrawerList, \
+    Grading, Prioritization, \
     MultiChoice, GroupQuestions, WelcomePage, ThanksPage
 
 
@@ -170,5 +171,8 @@ class WelcomePageSerializer(serializers.ModelSerializer):
 class ThanksPageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ThanksPage
-        fields = ['id', 'link', 'has_social_link', 'has_eitaa', 'has_soroush', 'has_telegram', 'has_instagram',
+        fields = ['id', 'short_url_uuid', 'has_social_link', 'has_eitaa', 'has_soroush', 'has_telegram',
+                  'has_instagram',
                   'has_whatsapp']
+        read_only_fields = ['short_url_uuid']
+

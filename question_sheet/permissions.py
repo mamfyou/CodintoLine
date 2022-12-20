@@ -9,8 +9,8 @@ from question_sheet.models.qsheet_models import QuestionSheet
 class IsSuperuserOrOwner(BasePermission):
     def has_object_permission(self, obj, request, view):
         Request = request.request
-        return Request.owner.is_superuser or \
-               Request.owner == view.owner
+        return Request.user.is_superuser or \
+               Request.user == view.owner
 
 
 class IsSuperUserOrOwnerOrIsActive(BasePermission):

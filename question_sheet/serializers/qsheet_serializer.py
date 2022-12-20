@@ -38,7 +38,7 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
                   'has_progress_bar', 'is_one_question_each_page']
 
     def create(self, validated_data):
-        return QuestionSheet.objects.create(user=self.context['request'].user, **validated_data)
+        return QuestionSheet.objects.create(user=self.context['request'].owner, **validated_data)
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -103,11 +103,17 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         return question_item
 
     def validate(self, data):
+        WelcomePage_ContentType_id = ContentType.objects.get_for_model(WelcomePage).id
+        ThanksPage_ContentType_id = ContentType.objects.get_for_model(ThanksPage).id
         if data.get('field_type') is None:
             raise serializers.ValidationError('نوع سوال اجباری است!')
         elif data.get('field_type').id == ContentType.objects.get_for_model(ThanksPage).id:
             if ThanksPage.objects.filter(short_url_uuid=self.context['pk']).exists():
                 raise serializers.ValidationError('صفحه تشکر برای این سوالنامه قبلا ایجاد شده است!')
+        elif data.get('field_type').id == WelcomePage_ContentType_id:
+            if QuestionItem.objects.filter(field_type=WelcomePage_ContentType_id,
+                                           question__parent_id=data['question']['parent_id']).exists():
+                raise serializers.ValidationError('صفحه خوش آمدگویی برای این سوالنامه قبلا ایجاد شده است!')
         elif data.get('field_type') not in ContentType.objects.all():
             raise serializers.ValidationError('نوع سوال اشتباه است!')
         elif data.get('question') is None:

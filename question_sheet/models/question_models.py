@@ -1,7 +1,9 @@
+import json
+
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
-from question_sheet.models.qsheet_models import QuestionSheet
+from question_sheet.models.qsheet_models import Question
 
 # Create your models here.
 BUTTON_SHAPE = (('1', 'First'), ('2', 'Second'), ('3', 'Third'), ('4', 'Fourth'), ('5', 'Fifth'), ('6', 'Sixth'))
@@ -45,8 +47,6 @@ class TextWithAnswer(models.Model):
 
 
 class DrawerList(models.Model):
-    options = ArrayField(models.CharField(max_length=255))
-    options_pic = ArrayField(models.ImageField(upload_to='media/', null=True, blank=True))
     min_selection = models.PositiveIntegerField(null=True, blank=True)
     max_selection = models.PositiveIntegerField(null=True, blank=True)
     is_random_order = models.BooleanField(default=False)
@@ -66,15 +66,11 @@ class GroupQuestions(models.Model):
 
 
 class Prioritization(models.Model):
-    options = ArrayField(models.CharField(max_length=255))
-    options_pic = ArrayField(models.ImageField(upload_to='media/', null=True, blank=True))
     is_random_order = models.BooleanField(default=False)
     is_alphabetic_order = models.BooleanField(default=False)
 
 
 class MultiChoice(models.Model):
-    options = ArrayField(models.CharField(max_length=255))
-    options_pic = ArrayField(models.ImageField(upload_to='media/', null=True, blank=True))
     min_selection = models.PositiveIntegerField(null=True, blank=True)
     max_selection = models.PositiveIntegerField(null=True, blank=True)
     extra_actions = models.JSONField(null=True, blank=True)
@@ -98,3 +94,10 @@ class ThanksPage(models.Model):
     has_whatsapp = models.BooleanField(default=False)
     has_instagram = models.BooleanField(default=False)
     has_soroush = models.BooleanField(default=False)
+
+
+class option(models.Model):
+    name = models.CharField(max_length=255)
+    picture = models.ImageField(upload_to='media/', null=True, blank=True)
+    order = models.PositiveIntegerField(null=True, blank=True)
+    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='options')

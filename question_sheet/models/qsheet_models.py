@@ -56,3 +56,6 @@ class QuestionItem(models.Model):
 
     def __str__(self):
         return self.question.title
+
+
+# class Answer(models.Model):

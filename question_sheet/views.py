@@ -1,9 +1,9 @@
 from rest_framework import status
-from rest_framework.mixins import DestroyModelMixin, UpdateModelMixin, RetrieveModelMixin, CreateModelMixin
+from rest_framework.mixins import DestroyModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet, ModelViewSet
 
-from question_sheet.models.qsheet_models import QuestionSheet, QuestionItem
+from question_sheet.models.qsheet_models import QuestionItem
 from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer
 from .permissions import *
 
@@ -22,6 +22,7 @@ class QuestionItemViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMi
 class QuestionSheetViewSet(ModelViewSet):
     def get_queryset(self):
         return QuestionSheet.objects.filter(is_active=True)
+
     serializer_class = QuestionSheetSerializer
     permission_classes = [IsSuperuserOrOwner]
 

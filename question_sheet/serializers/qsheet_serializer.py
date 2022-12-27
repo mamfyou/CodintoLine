@@ -2,10 +2,11 @@ import json
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
-from django.forms.fields import JSONString
+from drf_writable_nested import WritableNestedModelSerializer
 from generic_relations.relations import RenamedMethods
 from generic_relations.serializers import GenericSerializerMixin
 
+import question_sheet.serializers.question_serializer
 from question_sheet.models.qsheet_models import Question, QuestionItem, QuestionSheet
 from question_sheet.serializers.question_serializer import *
 
@@ -69,11 +70,22 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
         return QuestionSheet.objects.create(user=self.context['request'].owner, **validated_data)
 
 
-class QuestionSerializer(serializers.ModelSerializer):
+class QuestionSerializer(WritableNestedModelSerializer):
     class Meta:
         model = Question
-        fields = ['id', 'title', 'description', 'is_required', 'has_question_num', 'media', 'parent_type', 'parent_id',
-                  'parent']
+        fields = ['id', 'title', 'options', 'description', 'is_required', 'has_question_num', 'media', 'parent_type',
+                  'parent_id', 'parent']
+
+    options = OptionsSerializer(many=True, required=False)
+
+    def create(self, validated_data):
+        options_data = validated_data.pop('options')
+        question = Question.objects.create(**validated_data)
+        # options = []
+        for option_data in options_data:
+            Option.objects.create(question=question, **option_data)
+        # question.options.set(options)
+        return question
 
     def validate(self, attrs):
         if attrs.get('title') is None:
@@ -90,6 +102,21 @@ class QuestionSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
         elif attrs.get('parent_type') is None:
             raise serializers.ValidationError('نوع والد سوال اجباری است!')
+        # elif attrs.get('options') is not None:
+        #     for option in attrs.get('options'):
+        #         if option.get('title') is None:
+        #             raise serializers.ValidationError(f' متن گزینه {option} اجباری است! ')
+        #         elif option.get('title') == '':
+        #             raise serializers.ValidationError(f'متن گزینه {option} اجباری است!')
+        #         elif len(option.get('title')) < 5:
+        #             raise serializers.ValidationError(f'متن گزینه {option} باید حداقل 5 کاراکتر باشد!')
+        #         elif option.get('media') is not None:
+        #             if option.get('media').size > 2097152:
+        #                 raise serializers.ValidationError('حجم فایل باید کمتر از 20 مگابایت باشد!')
+        #             elif option.get('media').content_type not in ['image/jpeg', 'image/png', 'image/gif',
+        #                                                           'image/svg+xml', 'image/webp', 'video/mp4',
+        #                                                           'video/ogg', 'video/webm']:
+        #                 raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
         return attrs
 
 
@@ -121,24 +148,36 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         question_data = validated_data.pop('question')
         field_object_data = validated_data.pop('field_object')
         field_type_data = validated_data.pop('field_type')
+        if question_data.get('options') is not None:
+            options = question_data.pop('options')
+        optionses = []
         the_class = SERIALIZER_DICT[field_type_data].Meta.model
         question = Question.objects.create(**question_data)
         if field_type_data == "ThanksPage":
             field_object = the_class.objects.create(short_url_uuid=self.context['pk'], **field_object_data)
+        elif field_type_data in ["DrawerList", "Prioritization", "MultiChoice"]:
+            for option_data in options:
+                optionses.append(Option.objects.create(question=question, **option_data))
+            question.options.set(optionses)
+            field_object = the_class.objects.create(**field_object_data)
         else:
             field_object = the_class.objects.create(**field_object_data)
-        question_item = QuestionItem.objects.create(question=question, field_object=field_object, **validated_data)
+        question_item = QuestionItem.objects.create(question=question, field_object=field_object,
+                                                    field_type=ContentType.objects.get_for_model(
+                                                        SERIALIZER_DICT[field_type_data].Meta.model), **validated_data)
         return question_item
 
     def validate(self, data):
-        WelcomePage_ContentType_id = ContentType.objects.get_for_model(WelcomePage).id
         if data.get('field_type') is None:
             raise serializers.ValidationError('نوع سوال اجباری است!')
+        elif data.get('field_type') not in ['DrawerList', 'MultiChoice', 'Prioritization'] and \
+                data.get('question').get('options') is not None:
+            raise serializers.ValidationError('سوال انتخابی نمی تواند دارای گزینه باشد!')
         elif data.get('field_type') == "ThanksPage":
             if ThanksPage.objects.filter(short_url_uuid=self.context['pk']).exists():
                 raise serializers.ValidationError('صفحه تشکر برای این سوالنامه قبلا ایجاد شده است!')
         elif data.get('field_type') == "WelcomePage":
-            if QuestionItem.objects.filter(field_type=WelcomePage_ContentType_id,
+            if QuestionItem.objects.filter(field_type="WelcomePage",
                                            question__parent_id=data['question']['parent_id']).exists():
                 raise serializers.ValidationError('صفحه خوش آمدگویی برای این سوالنامه قبلا ایجاد شده است!')
         elif data.get('field_type') not in SERIALIZER_DICT.keys():
@@ -147,4 +186,5 @@ class QuestionItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('سوال اجباری است!')
         elif data.get('field_object') is None:
             raise serializers.ValidationError('محتوای سوال اجباری است!')
+        SERIALIZER_DICT[data.get('field_type')].validate(data.get('field_object'))
         return data

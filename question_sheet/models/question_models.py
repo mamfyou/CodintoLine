@@ -50,7 +50,8 @@ class DrawerList(models.Model):
     min_selection = models.PositiveIntegerField(null=True, blank=True)
     max_selection = models.PositiveIntegerField(null=True, blank=True)
     is_random_order = models.BooleanField(default=False)
-    is_alphabet_order = models.BooleanField(default=False)
+    is_alphabetic_order = models.BooleanField(default=False)
+    is_multiple_choice = models.BooleanField(default=False)
 
 
 class Grading(models.Model):
@@ -96,8 +97,10 @@ class ThanksPage(models.Model):
     has_soroush = models.BooleanField(default=False)
 
 
-class option(models.Model):
+class Option(models.Model):
     name = models.CharField(max_length=255)
     picture = models.ImageField(upload_to='media/', null=True, blank=True)
     order = models.PositiveIntegerField(null=True, blank=True)
     question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='options')
+
+

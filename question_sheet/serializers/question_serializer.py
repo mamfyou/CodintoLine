@@ -19,7 +19,8 @@ class TxtWithAnsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('ولیدیشن نمیتواند خالی باشد')
         elif validation.get('kind') is None:
             raise serializers.ValidationError('نوع الگو نمیتواند خالی باشد!')
-        elif validation.get('kind') not in ['text', 'number', 'email', 'phone', 'ip', 'url']:
+        elif validation.get('kind') not in ['text', 'number', 'email', 'cellphone', 'date', 'time', 'telephone', 'ip'
+            , 'regex']:
             raise serializers.ValidationError('نوع الگو نامعتبر است!')
         elif validation.get('kind') == 'text' and attrs['validation'].get(
                 'min_length') is not None and not re.fullmatch(is_number_regex,
@@ -36,6 +37,8 @@ class TxtWithAnsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('الگو نمونه نمیتواند خالی باشد!')
         elif validation.get('kind') != 'text' and attrs['validation'].get('evaluation_message') is None:
             raise serializers.ValidationError('پیام اعتبارسنجی نمیتواند خالی باشد!')
+        elif validation.get('kind') == 'regex' and attrs['validation'].get('regex_pattern') is None:
+            raise serializers.ValidationError('الگوی عبارت منظم نمیتواند خالی باشد!')
         return attrs
 
 
@@ -113,7 +116,9 @@ class DrawerListSerializer(serializers.ModelSerializer):
     is_multiple_choice = serializers.BooleanField(required=False)
 
     def validate(self, attrs):
-        if attrs.get('min_selection') > attrs.get('max_selection'):
+        if attrs.get('min_selection') is None or attrs.get('max_selection') is None:
+            raise serializers.ValidationError('حداقل و حداکثر انتخاب نمیتواند خالی باشد!')
+        elif attrs.get('min_selection') > attrs.get('max_selection'):
             raise serializers.ValidationError('حداقل انتخاب نمیتواند بیشتر از حداکثر انتخاب باشد!')
         return attrs
 
@@ -146,6 +151,13 @@ class MultiChoiceSerializer(serializers.ModelSerializer):
                   'is_alphabetic_order', 'is_random_order', 'is_vertical_display', 'is_2x_picture', 'is_select_all']
 
     is_extra_action = serializers.BooleanField(required=False)
+
+    def validate(self, attrs):
+        if attrs.get('min_selection') is None or attrs.get('max_selection') is None:
+            raise serializers.ValidationError('حداقل و حداکثر انتخاب نمیتواند خالی باشد!')
+        elif attrs.get('min_selection') > attrs.get('max_selection'):
+            raise serializers.ValidationError('حداقل انتخاب نمیتواند بیشتر از حداکثر انتخاب باشد!')
+        return attrs
 
     def validate(self, attrs):
         if attrs.get('min_selection') > attrs.get('max_selection'):

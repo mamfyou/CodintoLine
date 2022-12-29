@@ -1,14 +1,15 @@
 from rest_framework import status
-from rest_framework.mixins import DestroyModelMixin, CreateModelMixin
+from rest_framework.mixins import DestroyModelMixin, CreateModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet, ModelViewSet
 
-from question_sheet.models.qsheet_models import QuestionItem
-from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer
+from question_sheet.models.qsheet_models import QuestionItem, AnswerSet, Folder
+from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer, \
+    AnswerSetSerializer, FolderSerializer
 from .permissions import *
 
 
-class QuestionItemViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMixin, GenericViewSet):
+class QuestionItemViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMixin):
     def get_queryset(self):
         return QuestionItem.objects.select_related('question').all()
 
@@ -36,3 +37,19 @@ class QuestionSheetViewSet(ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+
+class AnswerSetViewSet(ReadOnlyModelViewSet, CreateModelMixin, UpdateModelMixin):
+    def get_queryset(self):
+        return AnswerSet.objects.prefetch_related('answers').filter(
+            question_sheet__id=self.kwargs.get('questionSheet_pk'))
+
+    serializer_class = AnswerSetSerializer
+
+
+class FolderViewSet(ModelViewSet):
+    def get_queryset(self):
+        return Folder.objects.all()
+
+    serializer_class = FolderSerializer
+    permission_classes = [IsSuperuserOrOwner]

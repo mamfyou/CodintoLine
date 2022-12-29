@@ -6,7 +6,9 @@ from question_sheet.views import *
 
 router = DefaultRouter()
 router.register('', QuestionSheetViewSet, basename='question-sheet')
+router.register('panel', QuestionSheetViewSet, basename='panel')
 
-routers = NestedDefaultRouter(router, '', lookup='questionSheet')
-routers.register('question', QuestionItemViewSet, basename='question')
-urlpatterns = router.urls + routers.urls
+nested_router = NestedDefaultRouter(router, '', lookup='questionSheet')
+nested_router.register('answer', AnswerSetViewSet, basename='answer')
+nested_router.register('question', QuestionItemViewSet, basename='question')
+urlpatterns = router.urls + nested_router.urls

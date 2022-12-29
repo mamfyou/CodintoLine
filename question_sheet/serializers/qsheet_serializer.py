@@ -6,9 +6,9 @@ from drf_writable_nested import WritableNestedModelSerializer
 from generic_relations.relations import RenamedMethods
 from generic_relations.serializers import GenericSerializerMixin
 
-import question_sheet.serializers.question_serializer
-from question_sheet.models.qsheet_models import Question, QuestionItem, QuestionSheet
+from question_sheet.models.qsheet_models import Question, QuestionItem, QuestionSheet, AnswerSet, Answer, Folder
 from question_sheet.serializers.question_serializer import *
+from question_sheet.validators import *
 
 SERIALIZER_DICT = {
     'TextWithAnswer': TxtWithAnsSerializer(),
@@ -25,6 +25,19 @@ SERIALIZER_DICT = {
     'GroupQuestions': GroupQuestionSerializer(),
     'WelcomePage': WelcomePageSerializer(),
     'ThanksPage': ThanksPageSerializer(),
+}
+
+VALIDATORS_DICT = {
+    Range: range_validator,
+    Email: email_validator,
+    Link: link_validator,
+    File: file_validator,
+    Grading: grading_validator,
+    Number: number_validator,
+    Prioritization: prioritization_validator,
+    DrawerList: drawerlist_validator,
+    MultiChoice: multichoice_validator,
+    TextWithAnswer: textwithanswer_validator,
 }
 
 
@@ -81,10 +94,8 @@ class QuestionSerializer(WritableNestedModelSerializer):
     def create(self, validated_data):
         options_data = validated_data.pop('options')
         question = Question.objects.create(**validated_data)
-        # options = []
         for option_data in options_data:
             Option.objects.create(question=question, **option_data)
-        # question.options.set(options)
         return question
 
     def validate(self, attrs):
@@ -102,21 +113,19 @@ class QuestionSerializer(WritableNestedModelSerializer):
                 raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
         elif attrs.get('parent_type') is None:
             raise serializers.ValidationError('نوع والد سوال اجباری است!')
-        # elif attrs.get('options') is not None:
-        #     for option in attrs.get('options'):
-        #         if option.get('title') is None:
-        #             raise serializers.ValidationError(f' متن گزینه {option} اجباری است! ')
-        #         elif option.get('title') == '':
-        #             raise serializers.ValidationError(f'متن گزینه {option} اجباری است!')
-        #         elif len(option.get('title')) < 5:
-        #             raise serializers.ValidationError(f'متن گزینه {option} باید حداقل 5 کاراکتر باشد!')
-        #         elif option.get('media') is not None:
-        #             if option.get('media').size > 2097152:
-        #                 raise serializers.ValidationError('حجم فایل باید کمتر از 20 مگابایت باشد!')
-        #             elif option.get('media').content_type not in ['image/jpeg', 'image/png', 'image/gif',
-        #                                                           'image/svg+xml', 'image/webp', 'video/mp4',
-        #                                                           'video/ogg', 'video/webm']:
-        #                 raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
+        elif attrs.get('options') is not None:
+            for option in attrs.get('options'):
+                if option.get('name') is None:
+                    raise serializers.ValidationError(f' متن گزینه {option} اجباری است! ')
+                elif option.get('name') == '':
+                    raise serializers.ValidationError(f'متن گزینه {option} اجباری است!')
+                elif option.get('media') is not None:
+                    if option.get('media').size > 2097152:
+                        raise serializers.ValidationError('حجم فایل باید کمتر از 20 مگابایت باشد!')
+                    elif option.get('media').content_type not in ['image/jpeg', 'image/png', 'image/gif',
+                                                                  'image/svg+xml', 'image/webp', 'video/mp4',
+                                                                  'video/ogg', 'video/webm']:
+                        raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
         return attrs
 
 
@@ -188,3 +197,73 @@ class QuestionItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('محتوای سوال اجباری است!')
         SERIALIZER_DICT[data.get('field_type')].validate(data.get('field_object'))
         return data
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ['id', 'question', 'answer', 'file', 'answer_set']
+        extra_kwargs = {
+            'file': {'required': False},
+            'answer_set': {'read_only': True}
+        }
+
+
+class AnswerSetSerializer(WritableNestedModelSerializer):
+    class Meta:
+        model = AnswerSet
+        fields = ['id', 'question_sheet', 'answers']
+
+    answers = AnswerSerializer(many=True, required=False)
+
+    def create(self, validated_data):
+        if validated_data.get('answers') is not None:
+            answers_data = validated_data.pop('answers')
+            answers = []
+            answer_set = AnswerSet.objects.create(**validated_data)
+            for i in range(len(answers_data)):
+                answers.append(
+                    Answer.objects.create(answer=answers_data[i].get('answer'),
+                                          answer_set=answer_set,
+                                          question=answers_data[i]['question'],
+                                          file=answers_data[i].get('file')))
+            answer_set.answers.set(answers)
+        return answer_set
+
+    def update(self, instance, validated_data):
+        if validated_data.get('answers') is not None:
+            answers_data = validated_data.pop('answers')
+            answers = []
+            for i in range(len(answers_data)):
+                answers.append(
+                    Answer.objects.create(answer=answers_data[i]['answer'],
+                                          answer_set=answers_data[i]['answer_set'],
+                                          question=answers_data[i]['question']))
+            instance.answers.set(answers)
+        return instance
+
+    def validate(self, data):
+        file_flag = False
+        if data.get('answers') is None:
+            raise serializers.ValidationError('پاسخ ها اجباری است!')
+        elif data.get('question_sheet') is None:
+            raise serializers.ValidationError('سوالنامه اجباری است!')
+        for i in data['answers']:
+            object = QuestionItem.objects.get(question_id=i['question'].id)
+            if i.get('answer') is None and type(object) != File:
+                    raise serializers.ValidationError('پاسخ اجباری است!')
+            elif i.get('question') is None:
+                raise serializers.ValidationError('سوال اجباری است!')
+            file_flag = type(object.field_object) == File
+            if file_flag is False and i.get('file') is not None:
+                raise serializers.ValidationError('ارسال فایل مجاز نمی باشد!')
+            elif type(object.field_object) in [Text, GroupQuestions, WelcomePage, ThanksPage]:
+                raise serializers.ValidationError('این سوال نمی تواند پاسخ داده شود!')
+            VALIDATORS_DICT[type(object.field_object)](i.get('answer'), object, i.get('file'))
+        return data
+
+
+class FolderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Folder
+        fields = ['id', 'name', 'parent', 'qsheet']

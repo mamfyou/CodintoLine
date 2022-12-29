@@ -23,6 +23,7 @@ class QuestionSheet(models.Model):
     is_active = models.BooleanField(default=True)
     has_progress_bar = models.BooleanField(default=False)
     is_one_question_each_page = models.BooleanField(default=False)
+    Folder = models.ForeignKey('Folder', on_delete=models.CASCADE, related_name='qsheet', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -44,7 +45,7 @@ class Question(models.Model):
 
 
 class QuestionItem(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_items')
     field_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in': (
         'range', 'number', 'link', 'email', 'text', 'file', 'textwithanswer', 'drawerlist', 'grading', 'groupquestions',
         'prioritization', 'multichoice', 'welcomepage', 'thankspage')})
@@ -58,4 +59,31 @@ class QuestionItem(models.Model):
         return self.question.title
 
 
-# class Answer(models.Model):
+class Answer(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.JSONField(null=True, blank=True)
+    file = models.FileField(upload_to='files/', null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    answer_set = models.ForeignKey('AnswerSet', on_delete=models.CASCADE, related_name='answers')
+
+    def __str__(self):
+        return self.question.id
+
+    class Meta:
+        unique_together = ('question', 'answer_set')
+
+
+class AnswerSet(models.Model):
+    question_sheet = models.ForeignKey(QuestionSheet, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.question_sheet.name
+
+
+class Folder(models.Model):
+    name = models.CharField(max_length=100)
+    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name

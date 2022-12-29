@@ -56,9 +56,7 @@ def file_validator(value, instance, file):
 
 def grading_validator(value, instance, file):
     instance = instance.field_object
-    print('@@')
     for i in value:
-        print(i)
         if i not in ['grade']:
             raise serializers.ValidationError('الگوی پاسخ ارسالی نامعتبر است!')
     if value.get('grade') is None:

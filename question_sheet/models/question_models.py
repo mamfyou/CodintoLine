@@ -55,7 +55,9 @@ class DrawerList(models.Model):
 
 
 class Grading(models.Model):
-    start_grade_at = models.PositiveIntegerField()
+    DEFAULT_ICON = (
+    ('like', 'Like_Button'), ('star', 'Star_Button'), ('heart', 'Heart_Button'), ('tick', 'Tick_Button'))
+    default_icon = models.CharField(max_length=20, null=True, blank=True)
     end_grade_at = models.PositiveIntegerField()
     icon = models.ImageField(upload_to='media/', null=True, blank=True)
 
@@ -102,5 +104,3 @@ class Option(models.Model):
     picture = models.ImageField(upload_to='media/', null=True, blank=True)
     order = models.PositiveIntegerField(null=True, blank=True)
     question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='options')
-
-

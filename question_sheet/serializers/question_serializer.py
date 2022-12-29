@@ -126,11 +126,11 @@ class DrawerListSerializer(serializers.ModelSerializer):
 class GradingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grading
-        fields = ['id', 'start_grade_at', 'end_grade_at', 'icon']
+        fields = ['id', 'default_icon', 'end_grade_at', 'icon']
 
     def validate(self, attrs):
-        if attrs.get('start_grade_at') > attrs.get('end_grade_at'):
-            raise serializers.ValidationError('مقدار شروع بازه نمیتواند بزرگتر یا مساوی مقدار پایان بازه باشد!')
+        if attrs.get('default_icon') is None and attrs.get('icon') is None:
+            raise serializers.ValidationError('آیکون پیشفرض و آیکون نمیتواند هردو خالی باشد!')
         elif attrs.get('icon') is not None and attrs.get('icon').size >= 3000000:
             raise serializers.ValidationError('حجم آیکون نمیتواند بیشتر از 3 مگابایت باشد!')
         elif attrs.get('icon') is not None and attrs.get('icon').content_type != 'PNG':

@@ -36,8 +36,8 @@ def link_validator(value, instance, file):
     for i in value:
         if i not in ['link']:
             raise serializers.ValidationError('الگوی پاسخ ارسالی نامعتبر است!')
-    if re.search(r'^https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+$', value) is None:
-        raise serializers.ValidationError('لینک معتبر باشد!')
+    if re.search(r'^https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+$', value['link']) is None:
+        raise serializers.ValidationError('لینک معتبر نمی باشد!')
     return value
 
 
@@ -45,7 +45,6 @@ def file_validator(value, instance, file):
     instance = instance.field_object
     if file is None:
         raise serializers.ValidationError('فایل نمیتواند خالی باشد!')
-    print(file.size)
     if file.size > instance.max_size:
         raise serializers.ValidationError('حجم فایل بیشتر از حد مجاز است! حد مجاز: ' + str(instance.max_size) + ' بایت')
     if file.content_type not in ['application/pdf', 'application/msword',
@@ -57,7 +56,9 @@ def file_validator(value, instance, file):
 
 def grading_validator(value, instance, file):
     instance = instance.field_object
+    print('@@')
     for i in value:
+        print(i)
         if i not in ['grade']:
             raise serializers.ValidationError('الگوی پاسخ ارسالی نامعتبر است!')
     if value.get('grade') is None:
@@ -98,21 +99,20 @@ def prioritization_validator(value, instance, file):
             raise serializers.ValidationError('الگوی پاسخ ارسالی نامعتبر است!')
     if value.get('prioritization') is None:
         raise serializers.ValidationError('عدد نمیتواند خالی باشد!')
-    elif type(value['prioritization']) != int:
-        raise serializers.ValidationError('عدد باید عددی باشد!')
-    elif instance.start_range_at is not None and int(value.get('prioritization')) > instance.end_range_at:
-        raise serializers.ValidationError(f'عدد ارسالی باید کمتر از حداکثر {instance.end_range_at} باشد!')
-    elif instance.end_range_at is not None and int(value.get('prioritization')) < instance.start_range_at:
-        raise serializers.ValidationError(f'عدد ارسالی باید بیشتر از {instance.start_range_at} باشد!')
+    elif type(value['prioritization']) != list:
+        raise serializers.ValidationError('پاسخ باید به صورت آرایه باشد!')
     return value
 
 
 def drawerlist_validator(value, instance, file):
     # todo: add more validators
     options_id = [i.id for i in Option.objects.filter(question=instance.question)]
+    for i in value:
+        if i not in ['options']:
+            raise serializers.ValidationError('الگوی پاسخ ارسالی نامعتبر است!')
     if type(value['options']) != list:
         raise serializers.ValidationError('فرم ارسالی باید آرایه باشد!')
-    elif len(value['options']) > 1 and instance.is_multiple is False:
+    elif len(value['options']) > 1 and instance.field_object.is_multiple_choice is False:
         raise serializers.ValidationError('این سوال تنها یک گزینه را قبول میکند!')
     elif len(
             value['options']) < instance.field_object.min_selection and instance.field_object.min_selection is not None:
@@ -130,6 +130,9 @@ def drawerlist_validator(value, instance, file):
 
 def multichoice_validator(value, instance, file):
     options_id = [i.id for i in Option.objects.filter(question=instance.question)]
+    for i in value:
+        if i not in ['options']:
+            raise serializers.ValidationError('الگوی پاسخ ارسالی نامعتبر است!')
     if type(value['options']) != list:
         raise serializers.ValidationError('فرم ارسالی باید آرایه باشد!')
     elif len(
@@ -149,6 +152,9 @@ def multichoice_validator(value, instance, file):
 def textwithanswer_validator(value, instance, file):
     instance = instance.field_object
     validation_kind = instance.validation.get('kind')
+    for i in value:
+        if i not in ['answer_text']:
+            raise serializers.ValidationError('الگوی پاسخ ارسالی نامعتبر است!')
     if validation_kind is None:
         return value
     elif validation_kind == 'text':

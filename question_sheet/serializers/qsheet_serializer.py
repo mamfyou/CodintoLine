@@ -193,6 +193,12 @@ class QuestionItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('نوع سوال اشتباه است!')
         elif data.get('question') is None:
             raise serializers.ValidationError('سوال اجباری است!')
+        elif data.get('field_type') in ['MultiChoice', 'DrawerList']:
+            if len(data.get('question').get('options')) < data.get('field_object').get('min_selection'):
+                raise serializers.ValidationError('حداقل تعیین شده بیشتر از تعداد گزینه ها است!')
+        elif data.get('field_type') in ['MultiChoice', 'DrawerList']:
+            if len(data.get('question').get('options')) > data.get('field_object').get('max_selection'):
+                raise serializers.ValidationError('حداکثر تعیین شده بیشتر از تعداد گزینه ها است!')
         elif data.get('field_object') is None:
             raise serializers.ValidationError('محتوای سوال اجباری است!')
         SERIALIZER_DICT[data.get('field_type')].validate(data.get('field_object'))
@@ -250,8 +256,8 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
             raise serializers.ValidationError('سوالنامه اجباری است!')
         for i in data['answers']:
             object = QuestionItem.objects.get(question_id=i['question'].id)
-            if i.get('answer') is None and type(object) != File:
-                    raise serializers.ValidationError('پاسخ اجباری است!')
+            if i.get('answer') is None and type(object.field_object) != File:
+                raise serializers.ValidationError('پاسخ اجباری است!')
             elif i.get('question') is None:
                 raise serializers.ValidationError('سوال اجباری است!')
             file_flag = type(object.field_object) == File

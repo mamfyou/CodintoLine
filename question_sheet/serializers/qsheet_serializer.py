@@ -186,8 +186,7 @@ class QuestionItemSerializer(serializers.ModelSerializer):
             if ThanksPage.objects.filter(short_url_uuid=self.context['pk']).exists():
                 raise serializers.ValidationError('صفحه تشکر برای این سوالنامه قبلا ایجاد شده است!')
         elif data.get('field_type') == "WelcomePage":
-            if QuestionItem.objects.filter(field_type="WelcomePage",
-                                           question__parent_id=data['question']['parent_id']).exists():
+            if QuestionItem.objects.filter(question__parent_id=data['question']['parent_id']).exists():
                 raise serializers.ValidationError('صفحه خوش آمدگویی برای این سوالنامه قبلا ایجاد شده است!')
         elif data.get('field_type') not in SERIALIZER_DICT.keys():
             raise serializers.ValidationError('نوع سوال اشتباه است!')

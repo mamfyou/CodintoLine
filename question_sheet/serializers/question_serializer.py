@@ -19,23 +19,26 @@ class TxtWithAnsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('ولیدیشن نمیتواند خالی باشد')
         elif validation.get('kind') is None:
             raise serializers.ValidationError('نوع الگو نمیتواند خالی باشد!')
-        elif validation.get('kind') not in ['text', 'number', 'email', 'cellphone', 'date', 'time', 'telephone', 'ip'
+        elif validation.get('kind') not in ['fa_text', 'en_text', 'number', 'email', 'cellphone', 'date', 'time',
+                                            'telephone', 'ip'
             , 'regex']:
             raise serializers.ValidationError('نوع الگو نامعتبر است!')
-        elif validation.get('kind') == 'text' and attrs['validation'].get(
+        elif validation.get('kind') in ['en_text', 'fa_text'] and attrs['validation'].get(
                 'min_length') is not None and not re.fullmatch(is_number_regex,
                                                                str(attrs['validation'].get('min_length'))):
             raise serializers.ValidationError('حداقل طول متن باید عدد باشد!')
-        elif validation.get('kind') == 'text' and attrs['validation'].get(
+        elif validation.get('kind') in ['en_text', 'fa_text'] and attrs['validation'].get(
                 'max_length') is not None and not re.fullmatch(is_number_regex,
                                                                str(attrs['validation'].get('max_length'))):
             raise serializers.ValidationError('حداکثر طول متن باید عدد باشد!')
-        elif validation.get('kind') == 'text' and validation.get('min_length') is not None and validation.get(
-                'max_length') and validation.get('min_length') >= validation.get('max_length'):
-            raise serializers.ValidationError('حداقل طول متن باید کمتر از حداکثر طول متن باشد!')
-        elif validation.get('kind') != 'text' and attrs['validation'].get('sample_pattern') is None:
+        elif validation.get('kind') in ['en_text', 'fa_text'] and validation.get('min_length') is not None:
+            if validation.get(
+                    'max_length') and validation.get('min_length') >= validation.get('max_length'):
+                raise serializers.ValidationError('حداقل طول متن باید کمتر از حداکثر طول متن باشد!')
+        elif validation.get('kind') not in ['en_text', 'fa_text'] and attrs['validation'].get('sample_pattern') is None:
             raise serializers.ValidationError('الگو نمونه نمیتواند خالی باشد!')
-        elif validation.get('kind') != 'text' and attrs['validation'].get('evaluation_message') is None:
+        elif validation.get('kind') not in ['en_text', 'fa_text'] and attrs['validation'].get(
+                'evaluation_message') is None:
             raise serializers.ValidationError('پیام اعتبارسنجی نمیتواند خالی باشد!')
         elif validation.get('kind') == 'regex' and attrs['validation'].get('regex_pattern') is None:
             raise serializers.ValidationError('الگوی عبارت منظم نمیتواند خالی باشد!')

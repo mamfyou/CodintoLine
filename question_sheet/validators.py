@@ -155,7 +155,13 @@ def textwithanswer_validator(value, instance, file):
             raise serializers.ValidationError('الگوی پاسخ ارسالی نامعتبر است!')
     if validation_kind is None:
         return value
-    elif validation_kind == 'text':
+    elif validation_kind == 'en_text':
+        if not re.match(r'^[a-zA-Z0-9]*$', value['answer_text']):
+            raise serializers.ValidationError('فقط از حروف انگلیسی و اعداد استفاده کنید!')
+    elif validation_kind == 'fa_text':
+        if not re.match(r'^[آ-ی0-9]*$', value['answer_text']):
+            raise serializers.ValidationError('فقط از حروف فارسی و اعداد استفاده کنید!')
+    elif validation_kind in ['en_text', 'fa_text', 'regex']:
         if len(value['answer_text']) < instance.validation.get('min_length'):
             raise serializers.ValidationError(
                 f'طول پاسخ باید حداقل {instance.validation.get("min_length")} باشد!')
@@ -165,6 +171,14 @@ def textwithanswer_validator(value, instance, file):
     elif validation_kind == 'number':
         if type(value['answer_text']) != int:
             raise serializers.ValidationError('پاسخ باید عددی باشد!')
+        elif instance.validation.get('min_length') is not None:
+            if value['answer_text'] < instance.validation.get('min_length'):
+                raise serializers.ValidationError(
+                    f'پاسخ باید حداقل {instance.validation.get("min_length")} باشد!')
+        elif instance.validation.get('max_length') is not None:
+            if value['answer_text'] > instance.validation.get('max_length'):
+                raise serializers.ValidationError(
+                    f'پاسخ باید حداکثر {instance.validation.get("max_length")} باشد!')
     elif validation_kind == 'email':
         if not re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', value['answer_text']):
             raise serializers.ValidationError('پاسخ باید ایمیل باشد!')

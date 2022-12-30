@@ -39,6 +39,7 @@ class Question(models.Model):
                                     limit_choices_to={'model__in': ('questionsheet', 'groupquestions')})
     parent_id = models.PositiveIntegerField()
     parent = GenericForeignKey('parent_type', 'parent_id')
+    question_number = models.DecimalField(max_digits=5, decimal_places=1, default=0)
 
     def __str__(self):
         return self.title

@@ -87,7 +87,7 @@ class QuestionSerializer(WritableNestedModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'title', 'options', 'description', 'is_required', 'has_question_num', 'media', 'parent_type',
-                  'parent_id', 'parent']
+                  'parent_id', 'parent', 'question_number']
 
     options = OptionsSerializer(many=True, required=False)
 
@@ -106,7 +106,7 @@ class QuestionSerializer(WritableNestedModelSerializer):
         elif len(attrs.get('title')) < 5:
             raise serializers.ValidationError('متن سوال باید حداقل 5 کاراکتر باشد!')
         elif attrs.get('media') is not None:
-            if attrs.get('media').size > 2097152:
+            if attrs.get('media').size > 20971520:
                 raise serializers.ValidationError('حجم فایل باید کمتر از 20 مگابایت باشد!')
             elif attrs.get('media').content_type not in ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml',
                                                          'image/webp', 'video/mp4', 'video/ogg', 'video/webm']:
@@ -249,6 +249,7 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
 
     def validate(self, data):
         file_flag = False
+        answers_questions = []
         if data.get('answers') is None:
             raise serializers.ValidationError('پاسخ ها اجباری است!')
         elif data.get('question_sheet') is None:
@@ -259,12 +260,15 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
                 raise serializers.ValidationError('پاسخ اجباری است!')
             elif i.get('question') is None:
                 raise serializers.ValidationError('سوال اجباری است!')
+            answers_questions.append(i.get('question'))
             file_flag = type(object.field_object) == File
             if file_flag is False and i.get('file') is not None:
                 raise serializers.ValidationError('ارسال فایل مجاز نمی باشد!')
             elif type(object.field_object) in [Text, GroupQuestions, WelcomePage, ThanksPage]:
                 raise serializers.ValidationError('این سوال نمی تواند پاسخ داده شود!')
             VALIDATORS_DICT[type(object.field_object)](i.get('answer'), object, i.get('file'))
+        if len(answers_questions) != len(set(answers_questions)):
+            raise serializers.ValidationError('لطفا برای هر سوال فقط یک جواب ثبت کنید!')
         return data
 
 

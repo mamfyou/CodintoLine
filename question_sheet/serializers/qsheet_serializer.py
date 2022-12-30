@@ -266,7 +266,7 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
                 raise serializers.ValidationError('ارسال فایل مجاز نمی باشد!')
             elif type(object.field_object) in [Text, GroupQuestions, WelcomePage, ThanksPage]:
                 raise serializers.ValidationError('این سوال نمی تواند پاسخ داده شود!')
-            VALIDATORS_DICT[type(object.field_object)](i.get('answer'), object, i.get('file'))
+            VALIDATORS_DICT[type(object.field_object)](i.get('answer'), object, i.get('file'), len(answers_questions))
         if len(answers_questions) != len(set(answers_questions)):
             raise serializers.ValidationError('لطفا برای هر سوال فقط یک جواب ثبت کنید!')
         return data

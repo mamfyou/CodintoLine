@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.validators import FileExtensionValidator
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -23,7 +24,7 @@ class QuestionSheet(models.Model):
     is_active = models.BooleanField(default=True)
     has_progress_bar = models.BooleanField(default=False)
     is_one_question_each_page = models.BooleanField(default=False)
-    Folder = models.ForeignKey('Folder', on_delete=models.CASCADE, related_name='qsheet', null=True, blank=True)
+    folder = models.ForeignKey('Folder', on_delete=models.CASCADE, related_name='qsheet', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -34,7 +35,8 @@ class Question(models.Model):
     description = models.TextField(max_length=500, null=True, blank=True)
     is_required = models.BooleanField(default=False)
     has_question_num = models.BooleanField(default=False)
-    media = models.FileField(upload_to='media/', null=True, blank=True)
+    media = models.FileField(upload_to='media/', null=True, blank=True,
+                             validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'mp4'])])
     parent_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,
                                     limit_choices_to={'model__in': ('questionsheet', 'groupquestions')})
     parent_id = models.PositiveIntegerField()
@@ -63,7 +65,10 @@ class QuestionItem(models.Model):
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer = models.JSONField(null=True, blank=True)
-    file = models.FileField(upload_to='files/', null=True, blank=True)
+    file = models.FileField(upload_to='files/',
+                            validators=[
+                                FileExtensionValidator('pdf', 'docx', 'doc', 'jpg', 'png', 'jpg', 'mp4', 'pptx', 'xlsx',
+                                                       'mp3')], null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     answer_set = models.ForeignKey('AnswerSet', on_delete=models.CASCADE, related_name='answers')
 

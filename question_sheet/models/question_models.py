@@ -1,11 +1,6 @@
-import json
-
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
-from question_sheet.models.qsheet_models import Question
 
-# Create your models here.
 BUTTON_SHAPE = (('1', 'First'), ('2', 'Second'), ('3', 'Third'), ('4', 'Fourth'), ('5', 'Fifth'), ('6', 'Sixth'))
 
 

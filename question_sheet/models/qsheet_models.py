@@ -67,8 +67,9 @@ class Answer(models.Model):
     answer = models.JSONField(null=True, blank=True)
     file = models.FileField(upload_to='files/',
                             validators=[
-                                FileExtensionValidator('pdf', 'docx', 'doc', 'jpg', 'png', 'jpg', 'mp4', 'pptx', 'xlsx',
-                                                       'mp3')], null=True, blank=True)
+                                FileExtensionValidator(
+                                    allowed_extensions=['pdf', 'docx', 'doc', 'jpg', 'png', 'jpg', 'mp4', 'pptx',
+                                                        'xlsx', 'mp3'])], null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     answer_set = models.ForeignKey('AnswerSet', on_delete=models.CASCADE, related_name='answers')
 

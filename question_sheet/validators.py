@@ -18,7 +18,8 @@ def range_validator(value, instance, file, index):
     elif instance.end_range_at is not None and int(value.get('grade')) > instance.end_range_at:
         raise serializers.ValidationError(f'عدد ارسالی باید کمتر از {instance.end_range_at} باشد در سوال {index} ام!')
     elif instance.start_range_at is not None and int(value.get('grade')) < instance.start_range_at:
-        raise serializers.ValidationError(f'عدد ارسالی باید بیشتر از {instance.start_range_at} باشد در سوال {index} ام!')
+        raise serializers.ValidationError(
+            f'عدد ارسالی باید بیشتر از {instance.start_range_at} باشد در سوال {index} ام!')
     return value
 
 
@@ -46,11 +47,8 @@ def file_validator(value, instance, file, index):
     if file is None:
         raise serializers.ValidationError(f'فایل نمیتواند خالی باشد! در سوال {index} ام')
     if file.size > instance.max_size:
-        raise serializers.ValidationError(f'حجم فایل بیشتر از حد مجاز است در سوال {index} ام! حد مجاز: ' + str(instance.max_size) + f' بایت')
-    if file.content_type not in ['application/pdf', 'application/msword',
-                                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                 'image/jpeg', 'image/png', 'image/gif', 'audio/mpeg', 'video/mp4']:
-        raise serializers.ValidationError(f'نوع فایل مجاز نیست در سوال {index} ام!')
+        raise serializers.ValidationError(
+            f'حجم فایل بیشتر از حد مجاز است در سوال {index} ام! حد مجاز: ' + str(instance.max_size) + f' بایت')
     return value
 
 
@@ -64,9 +62,11 @@ def grading_validator(value, instance, file, index):
     elif type(value['grade']) != int:
         raise serializers.ValidationError(f'نمره باید عددی باشد در سوال {index} ام!')
     elif instance.start_grade_at is not None and int(value.get('grade')) > instance.end_grade_at:
-        raise serializers.ValidationError(f'عدد ارسالی باید کمتر از حداکثر {instance.end_grade_at} باشد در سوال {index} ام!')
+        raise serializers.ValidationError(
+            f'عدد ارسالی باید کمتر از حداکثر {instance.end_grade_at} باشد در سوال {index} ام!')
     elif instance.end_grade_at is not None and int(value.get('grade')) < instance.start_grade_at:
-        raise serializers.ValidationError(f'عدد ارسالی باید بیشتر از {instance.start_grade_at} باشد در سوال {index} ام!')
+        raise serializers.ValidationError(
+            f'عدد ارسالی باید بیشتر از {instance.start_grade_at} باشد در سوال {index} ام!')
     return value
 
 
@@ -84,9 +84,11 @@ def number_validator(value, instance, file, index):
     elif instance.has_decimal is False and value['number'] % 1 != 0:
         raise serializers.ValidationError(f'عدد ارسالی نمیتواند اعشاری باشد در سوال {index} ام!')
     elif instance.min_num is not None and value['number'] < instance.min_num:
-        raise serializers.ValidationError(f'عدد ارسالی نمیتواند کمتر از {instance.min_num} حد مجاز باشد در سوال {index} ام!')
+        raise serializers.ValidationError(
+            f'عدد ارسالی نمیتواند کمتر از {instance.min_num} حد مجاز باشد در سوال {index} ام!')
     elif instance.max_num is not None and value['number'] > instance.max_num:
-        raise serializers.ValidationError(f'عدد ارسالی نمیتواند بیشتر از حد مجاز {instance.max_num} باشد در سوال {index} ام!')
+        raise serializers.ValidationError(
+            f'عدد ارسالی نمیتواند بیشتر از حد مجاز {instance.max_num} باشد در سوال {index} ام!')
     return value
 
 

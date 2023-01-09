@@ -80,7 +80,7 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
                   'has_progress_bar', 'is_one_question_each_page']
 
     def create(self, validated_data):
-        return QuestionSheet.objects.create(user=self.context['request'].owner, **validated_data)
+        return QuestionSheet.objects.create(owner=self.context['request'].user, **validated_data)
 
 
 class QuestionSerializer(WritableNestedModelSerializer):

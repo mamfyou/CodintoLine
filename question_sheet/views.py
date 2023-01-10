@@ -23,7 +23,7 @@ class QuestionItemViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMi
 
 class QuestionSheetViewSet(ModelViewSet):
     def get_queryset(self):
-        return QuestionSheet.objects.filter(is_active=True)
+        return QuestionSheet.objects.filter(is_active=True, owner=self.request.user)
 
     serializer_class = QuestionSheetSerializer
     permission_classes = [IsAuthenticated, IsSuperuserOrOwner]
@@ -34,10 +34,6 @@ class QuestionSheetViewSet(ModelViewSet):
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={'message': 'Successfully Archived in database'})
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
 
 
 class AnswerSetViewSet(ReadOnlyModelViewSet, CreateModelMixin, UpdateModelMixin):

@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.contrib.contenttypes.models import ContentType
@@ -78,9 +79,17 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
         model = QuestionSheet
         fields = ['id', 'language', 'name', 'start_date', 'end_date', 'duration',
                   'has_progress_bar', 'is_one_question_each_page']
+        extra_kwargs = {
+            'start_date':{'required': False},
+            'language':{'required': False}
+        }
 
     def create(self, validated_data):
-        return QuestionSheet.objects.create(owner=self.context['request'].user, **validated_data)
+        if validated_data.get('start_date') is None:
+            if validated_data.get('language') is None:
+                return QuestionSheet.objects.create(owner=self.context['request'].user, language='fa', start_date=datetime.date.today())
+            return QuestionSheet.objects.create(owner=self.context['request'].user, start_date=datetime.date.today())
+        return QuestionSheet.objects.create(owner=self.context['request'].user,**validated_data)
 
 
 class QuestionSerializer(WritableNestedModelSerializer):

@@ -13,3 +13,4 @@ Untitled Diagram(13)(1).jpg
 /question_sheet/tests/
 pytest.ini
 /locust_files/
+.pytest_cache

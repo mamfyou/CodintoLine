@@ -7,7 +7,8 @@ from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet, ModelV
 from question_sheet.models.qsheet_models import QuestionItem, AnswerSet, Folder
 from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer, \
     AnswerSetSerializer, FolderSerializer
-from .permissions import *
+from .permissions import IsSuperuserOrOwner, IsSuperUserOrOwnerOrIsActive
+from .models.qsheet_models import QuestionSheet
 
 
 class QuestionItemViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMixin):
@@ -33,7 +34,6 @@ class QuestionSheetViewSet(ModelViewSet):
         instance.is_active = False
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT, data={'message': 'Successfully Archived in database'})
-
 
 
 class AnswerSetViewSet(ReadOnlyModelViewSet, CreateModelMixin, UpdateModelMixin):

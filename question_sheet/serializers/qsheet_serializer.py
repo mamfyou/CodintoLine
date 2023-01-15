@@ -7,7 +7,7 @@ from drf_writable_nested import WritableNestedModelSerializer
 from generic_relations.relations import RenamedMethods
 from generic_relations.serializers import GenericSerializerMixin
 
-from question_sheet.models.qsheet_models import Question, QuestionItem, QuestionSheet, AnswerSet, Answer, Folder
+from question_sheet.models.qsheet_models import Question, QuestionItem, QuestionSheet, AnswerSet, Answer
 from question_sheet.serializers.question_serializer import *
 from question_sheet.validators import *
 
@@ -279,9 +279,3 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
         if len(answers_questions) != len(set(answers_questions)):
             raise serializers.ValidationError('لطفا برای هر سوال فقط یک جواب ثبت کنید!')
         return data
-
-
-class FolderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Folder
-        fields = ['id', 'name', 'parent', 'qsheet']

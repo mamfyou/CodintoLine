@@ -6,6 +6,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from user.models import Folder
+
 
 class QuestionSheet(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, auto_created=True)
@@ -24,7 +26,7 @@ class QuestionSheet(models.Model):
     is_active = models.BooleanField(default=True)
     has_progress_bar = models.BooleanField(default=False)
     is_one_question_each_page = models.BooleanField(default=False)
-    folder = models.ForeignKey('Folder', on_delete=models.CASCADE, related_name='qsheet', null=True, blank=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='qsheet', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -86,11 +88,3 @@ class AnswerSet(models.Model):
 
     def __str__(self):
         return self.question_sheet.name
-
-
-class Folder(models.Model):
-    name = models.CharField(max_length=100)
-    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name

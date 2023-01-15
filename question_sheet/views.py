@@ -4,9 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet, ModelViewSet
 
-from question_sheet.models.qsheet_models import QuestionItem, AnswerSet, Folder
+from question_sheet.models.qsheet_models import QuestionItem, AnswerSet
 from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer, \
-    AnswerSetSerializer, FolderSerializer
+    AnswerSetSerializer
 from .permissions import IsSuperuserOrOwner, IsSuperUserOrOwnerOrIsActive
 from .models.qsheet_models import QuestionSheet
 
@@ -44,9 +44,3 @@ class AnswerSetViewSet(ReadOnlyModelViewSet, CreateModelMixin, UpdateModelMixin)
     serializer_class = AnswerSetSerializer
 
 
-class FolderViewSet(ModelViewSet):
-    def get_queryset(self):
-        return Folder.objects.all()
-
-    serializer_class = FolderSerializer
-    permission_classes = [IsSuperuserOrOwner]

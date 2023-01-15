@@ -1,6 +1,5 @@
 from django.db import models
 
-
 BUTTON_SHAPE = (('1', 'First'), ('2', 'Second'), ('3', 'Third'), ('4', 'Fourth'), ('5', 'Fifth'), ('6', 'Sixth'))
 
 
@@ -51,7 +50,7 @@ class DrawerList(models.Model):
 
 class Grading(models.Model):
     DEFAULT_ICON = (
-    ('like', 'Like_Button'), ('star', 'Star_Button'), ('heart', 'Heart_Button'), ('tick', 'Tick_Button'))
+        ('like', 'Like_Button'), ('star', 'Star_Button'), ('heart', 'Heart_Button'), ('tick', 'Tick_Button'))
     default_icon = models.CharField(max_length=20, null=True, blank=True)
     end_grade_at = models.PositiveIntegerField()
     icon = models.ImageField(upload_to='media/', null=True, blank=True)

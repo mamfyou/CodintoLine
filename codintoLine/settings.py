@@ -39,13 +39,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'djoser',
     'debug_toolbar',
+    'django_filters',
     'rest_framework',
     'generic_relations',
     'rest_framework_nested',
 
     'question_sheet',
     'user',
+    'core',
 
 ]
 
@@ -144,4 +147,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # JWT
+        'rest_framework_simplejwt.authentication.JWTAuthentication'],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '20/minute',
+        'user': '30/minute'
+    }
+
 }
+
+CELERY_BROKER_URL = 'redis://localhost:6378/2'
+

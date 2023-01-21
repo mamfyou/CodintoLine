@@ -24,7 +24,8 @@ urlpatterns = [
     path('__debug__/', include('debug_toolbar.urls')),
     path('api/qsheet/', include('question_sheet.urls')),
     path('api/panel/', include('user.urls')),
-    path('auth/', include('rest_framework.urls')),
+    path('api/auth/', include('core.urls')),
+    path('api/jwt/', include('djoser.urls.jwt')),
 ]
 
 if settings.DEBUG:

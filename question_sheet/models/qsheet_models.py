@@ -16,7 +16,7 @@ class QuestionSheet(models.Model):
         ('en', 'English'),
         ('fa', 'Persian'),
     )
-    language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES)
+    language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default='fa')
     name = models.CharField(max_length=100, blank=True, default='Untitled')
     owner = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
@@ -26,7 +26,7 @@ class QuestionSheet(models.Model):
     is_active = models.BooleanField(default=True)
     has_progress_bar = models.BooleanField(default=False)
     is_one_question_each_page = models.BooleanField(default=False)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='qsheet', null=True, blank=True)
+    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, related_name='questionSheets', null=True, blank=True)
 
     def __str__(self):
         return self.name

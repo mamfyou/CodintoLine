@@ -2,13 +2,13 @@ from rest_framework import status
 from rest_framework.mixins import DestroyModelMixin, CreateModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet, ModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from question_sheet.models.qsheet_models import QuestionItem, AnswerSet
 from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer, \
     AnswerSetSerializer
-from .permissions import IsSuperuserOrOwner, IsSuperUserOrOwnerOrIsActive
 from .models.qsheet_models import QuestionSheet
+from .permissions import IsSuperUserOrOwnerOrIsActive
 
 
 class QuestionItemViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMixin):
@@ -27,7 +27,7 @@ class QuestionSheetViewSet(ModelViewSet):
         return QuestionSheet.objects.filter(is_active=True, owner=self.request.user)
 
     serializer_class = QuestionSheetSerializer
-    permission_classes = [IsAuthenticated, IsSuperuserOrOwner]
+    permission_classes = [IsAuthenticated]
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

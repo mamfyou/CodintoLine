@@ -14,10 +14,10 @@ class LoginSerializer(serializers.Serializer):
     def create(self, validated_data):
         try:
             user = get_user_model().objects.get_or_create(phone_number=validated_data['phone_number'])
-            send_sms.delay(user[0].phone_number, user)
+            send_sms.delay(validated_data['phone_number'], user[0].id)
             return validated_data
         except Exception:
-            return serializers.ValidationError("مشکلی پیش آمده دوباره سعی کنید!")
+            serializers.ValidationError(Exception)
 
     def validate(self, attrs):
         phone_number = attrs.get('phone_number')

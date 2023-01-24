@@ -17,7 +17,8 @@ def send_sms(to, user):
     sms = api.sms()
     to = to
     _from = dotenv_values(".env")['SMS_HOST']
-    token = Token.objects.create(user=user[0], token=randint(100000, 999999))
+    token = Token.objects.create(user_id=user, token=randint(100000, 999999))
     text = 'کد تایید شما: ' + str(token.token)
     response = sms.send(to, _from, text)
+    print(response)
     return response

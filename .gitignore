@@ -6,7 +6,7 @@
 *.xml
 *.iml
 *.pyc
-*/migrations/*
+/*/migrations/0*.py
 .env
 db.sqlite3
 Untitled Diagram(13)(1).jpg

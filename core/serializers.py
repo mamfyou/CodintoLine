@@ -17,7 +17,7 @@ class LoginSerializer(serializers.Serializer):
             send_sms.delay(validated_data['phone_number'], user[0].id)
             return validated_data
         except Exception:
-            serializers.ValidationError(Exception)
+            return serializers.ValidationError(Exception)
 
     def validate(self, attrs):
         phone_number = attrs.get('phone_number')

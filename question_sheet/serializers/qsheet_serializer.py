@@ -45,18 +45,12 @@ VALIDATORS_DICT = {
 class GenericMamfRelatedField(GenericSerializerMixin, serializers.JSONField, metaclass=RenamedMethods):
 
     def get_deserializer_for_data(self, value):
-        the_serializer = []
         serializer = SERIALIZER_DICT[self.context['request'].data['field_type']]
         try:
             serializer.to_internal_value(value)
-            the_serializer.append(serializer)
         except Exception:
-            pass
-        l = len(the_serializer)
-        if l < 1:
-            raise ImproperlyConfigured(
-                'Invalid Data Format %r.' % value)
-        return the_serializer[0]
+            raise ImproperlyConfigured('Invalid Data Format %r.' % value)
+        return serializer
 
     def get_serializer_for_instance(self, instance):
         for serializer in self.serializers.values():
@@ -80,16 +74,17 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
         fields = ['id', 'language', 'name', 'start_date', 'end_date', 'duration',
                   'has_progress_bar', 'is_one_question_each_page']
         extra_kwargs = {
-            'start_date':{'required': False},
-            'language':{'required': False}
+            'start_date': {'required': False},
+            'language': {'required': False}
         }
 
     def create(self, validated_data):
         if validated_data.get('start_date') is None:
             if validated_data.get('language') is None:
-                return QuestionSheet.objects.create(owner=self.context['request'].user, language='fa', start_date=datetime.date.today())
+                return QuestionSheet.objects.create(owner=self.context['request'].user, language='fa',
+                                                    start_date=datetime.date.today())
             return QuestionSheet.objects.create(owner=self.context['request'].user, start_date=datetime.date.today())
-        return QuestionSheet.objects.create(owner=self.context['request'].user,**validated_data)
+        return QuestionSheet.objects.create(owner=self.context['request'].user, **validated_data)
 
 
 class QuestionSerializer(WritableNestedModelSerializer):
@@ -163,20 +158,21 @@ class QuestionItemSerializer(serializers.ModelSerializer):
     question = QuestionSerializer()
 
     def create(self, validated_data):
+        options = []
         question_data = validated_data.pop('question')
         field_object_data = validated_data.pop('field_object')
         field_type_data = validated_data.pop('field_type')
         if question_data.get('options') is not None:
             options = question_data.pop('options')
-        optionses = []
+        created_option = []
         the_class = SERIALIZER_DICT[field_type_data].Meta.model
         question = Question.objects.create(**question_data)
         if field_type_data == "ThanksPage":
             field_object = the_class.objects.create(short_url_uuid=self.context['pk'], **field_object_data)
         elif field_type_data in ["DrawerList", "Prioritization", "MultiChoice"]:
             for option_data in options:
-                optionses.append(Option.objects.create(question=question, **option_data))
-            question.options.set(optionses)
+                created_option.append(Option.objects.create(question=question, **option_data))
+            question.options.set(created_option)
             field_object = the_class.objects.create(**field_object_data)
         else:
             field_object = the_class.objects.create(**field_object_data)
@@ -231,6 +227,7 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
     answers = AnswerSerializer(many=True, required=False)
 
     def create(self, validated_data):
+        answer_set = None
         if validated_data.get('answers') is not None:
             answers_data = validated_data.pop('answers')
             answers = []

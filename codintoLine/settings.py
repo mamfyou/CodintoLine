@@ -24,6 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = dotenv_values(".env")['SECRET_KEY']
 
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -45,7 +46,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'generic_relations',
     'rest_framework_nested',
-
     'question_sheet',
     'user',
     'core',

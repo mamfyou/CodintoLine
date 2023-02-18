@@ -10,7 +10,7 @@
 .env
 db.sqlite3
 Untitled Diagram(13)(1).jpg
-#*/tests/
+*/tests/
 pytest.ini
 /locust_files/
 .pytest_cache

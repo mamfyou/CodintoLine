@@ -5,6 +5,7 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 from question_sheet.models.qsheet_models import QuestionSheet
 
+
 class IsSuperUserOrOwnerOrIsActive(BasePermission):
     def has_permission(self, request, view):
         qsheet_obj = get_object_or_404(QuestionSheet, id=view.kwargs['questionSheet_pk'])
@@ -32,3 +33,11 @@ class IsSuperUserOrOwner(BasePermission):
             return request.user.is_superuser or \
                    qsheet_obj.owner == request.user or \
                    request.method in SAFE_METHODS
+
+
+class IsSuperUserOrOwnerOrCreatePutOnly(BasePermission):
+    def has_permission(self, request, view):
+        if not request.method in ['POST', 'PUT', 'PATCH']:
+            qsheet_obj = get_object_or_404(QuestionSheet, id=view.kwargs['questionSheet_pk'])
+            return request.user == qsheet_obj.owner or request.user.is_superuser
+        return True

@@ -8,7 +8,7 @@ from question_sheet.models.qsheet_models import QuestionItem, AnswerSet
 from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer, \
     AnswerSetSerializer
 from .models.qsheet_models import QuestionSheet
-from .permissions import IsSuperUserOrOwnerOrIsActive
+from .permissions import IsSuperUserOrOwnerOrIsActive, IsSuperUserOrOwnerOrCreatePutOnly
 
 
 class QuestionItemViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMixin):
@@ -42,5 +42,6 @@ class AnswerSetViewSet(ReadOnlyModelViewSet, CreateModelMixin, UpdateModelMixin)
             question_sheet__id=self.kwargs.get('questionSheet_pk'))
 
     serializer_class = AnswerSetSerializer
+    permission_classes = [IsSuperUserOrOwnerOrCreatePutOnly]
 
 

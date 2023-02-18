@@ -94,6 +94,7 @@ class QuestionSerializer(WritableNestedModelSerializer):
                   'parent_id', 'parent', 'question_number']
 
     options = OptionsSerializer(many=True, required=False)
+    parent = QuestionSheetSerializer(read_only=True)
 
     def create(self, validated_data):
         options_data = validated_data.pop('options')

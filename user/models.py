@@ -6,7 +6,7 @@ from django.db import models
 
 # Create your models here.
 class CodintoLineUser(AbstractUser):
-    username = models.CharField(unique=False, max_length=50)
+    username = models.CharField(unique=False, max_length=50, blank=True, null=True)
     password = models.CharField(max_length=500, blank=True, null=True)
     phone_number = models.CharField(max_length=12, validators=[
         RegexValidator(regex='^09[0-9]{9}$', message='شماره تلفن همراه وارد شده صحیح نمی باشد')],

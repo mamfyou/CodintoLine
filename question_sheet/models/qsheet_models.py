@@ -10,7 +10,7 @@ from user.models import Folder
 
 
 class QuestionSheet(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, auto_created=True)
+    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, auto_created=True)
     LANGUAGE_CHOICES = (
         ('ar', 'Arabic'),
         ('en', 'English'),

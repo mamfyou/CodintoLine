@@ -36,7 +36,7 @@ class QuestionSheetViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT, data={'message': 'Successfully Archived in database'})
 
 
-class AnswerSetViewSet(ReadOnlyModelViewSet, CreateModelMixin, UpdateModelMixin):
+class AnswerSetViewSet(ReadOnlyModelViewSet, CreateModelMixin):
     def get_queryset(self):
         return AnswerSet.objects.prefetch_related('answers').filter(
             question_sheet__id=self.kwargs.get('questionSheet_pk'))

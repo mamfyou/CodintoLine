@@ -37,7 +37,7 @@ class IsSuperUserOrOwner(BasePermission):
 
 class IsSuperUserOrOwnerOrCreatePutOnly(BasePermission):
     def has_permission(self, request, view):
-        if not request.method in ['POST', 'PUT', 'PATCH']:
+        if not request.method in ['POST', 'OPTIONS', 'HEAD']:
             qsheet_obj = get_object_or_404(QuestionSheet, id=view.kwargs['questionSheet_pk'])
             return request.user == qsheet_obj.owner or request.user.is_superuser
         return True

@@ -243,18 +243,6 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
             answer_set.answers.set(answers)
         return answer_set
 
-    # def update(self, instance, validated_data):
-    #     if validated_data.get('answers') is not None:
-    #         answers_data = validated_data.pop('answers')
-    #         answers = []
-    #         for i in range(len(answers_data)):
-    #             answers.append(
-    #                 Answer.objects.create(answer=answers_data[i]['answer'],
-    #                                       answer_set=answers_data[i]['answer_set'],
-    #                                       question=answers_data[i]['question']))
-    #         instance.answers.set(answers)
-    #     return instance
-
     def validate(self, data):
         file_flag = False
         answers_questions = []

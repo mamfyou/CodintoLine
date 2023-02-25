@@ -29,6 +29,9 @@ class QuestionSheetViewSet(ModelViewSet):
     serializer_class = QuestionSheetSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_serializer_context(self):
+        return {'user': self.request.user, 'request': self.request}
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.is_active = False

@@ -72,7 +72,7 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionSheet
         fields = ['id', 'language', 'name', 'start_date', 'end_date', 'duration',
-                  'has_progress_bar', 'is_one_question_each_page']
+                  'has_progress_bar', 'is_one_question_each_page', 'folder']
         extra_kwargs = {
             'start_date': {'required': False},
             'language': {'required': False}
@@ -81,10 +81,17 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         if validated_data.get('start_date') is None:
             if validated_data.get('language') is None:
-                return QuestionSheet.objects.create(owner=self.context['request'].user, language='fa',
+                return QuestionSheet.objects.create(owner=self.context['user'], language='fa',
                                                     start_date=datetime.date.today())
-            return QuestionSheet.objects.create(owner=self.context['request'].user, start_date=datetime.date.today())
-        return QuestionSheet.objects.create(owner=self.context['request'].user, **validated_data)
+            return QuestionSheet.objects.create(owner=self.context['user'], start_date=datetime.date.today())
+        return QuestionSheet.objects.create(owner=self.context['user'], **validated_data)
+
+    def validate(self, attrs):
+        if attrs.get('folder') is None:
+            raise serializers.ValidationError('پوشه نمیتواند خالی باشد!')
+        elif attrs['folder'].owner != self.context['user']:
+            raise serializers.ValidationError('شما نمیتوانید پوشه ای که متعلق به شما نیست را انتخاب کنید!')
+        return attrs
 
 
 class QuestionSerializer(WritableNestedModelSerializer):

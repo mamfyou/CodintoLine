@@ -28,18 +28,10 @@ class FolderSerializer(serializers.ModelSerializer):
 class CodintoLineUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CodintoLineUser
-        fields = ['id', 'username', 'password', 'confirm_password', 'email', 'phone_number', 'folders']
-        extra_kwargs = {'password': {'write_only': True}}
-        read_only_fields = ['folders']
-
-    confirm_password = serializers.CharField(write_only=True, max_length=500)
+        fields = ['id', 'first_name', 'last_name', 'phone_number', 'is_active', 'is_staff', 'is_superuser']
+        read_only_fields = ['is_active', 'is_staff', 'is_superuser']
 
     def validate(self, attrs):
-        persian_letters = re.compile(r'[\u0600-\u06FF]+')
-        if attrs['password'] != attrs['confirm_password']:
-            raise serializers.ValidationError("رمز عبور و تکرار آن یکسان نیستند")
-        elif re.search(persian_letters, attrs.get('username')):
-            raise serializers.ValidationError("رمز عبور نباید شامل حروف فارسی باشد")
-        elif len(attrs['password']) < 8:
-            raise serializers.ValidationError("رمز عبور باید حداقل 8 کاراکتر باشد")
+        if not re.match(r'^09\d{9}$', attrs['phone_number']):
+            raise serializers.ValidationError('فرمت شماره تلفن نادرست می باشد!')
         return attrs

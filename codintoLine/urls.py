@@ -25,7 +25,6 @@ urlpatterns = [
     path('api/qsheet/', include('question_sheet.urls')),
     path('api/panel/', include('user.urls')),
     path('api/auth/', include('core.urls')),
-    path('api/jwt/', include('djoser.urls.jwt')),
 ]
 
 if settings.DEBUG:

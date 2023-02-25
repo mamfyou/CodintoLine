@@ -6,7 +6,7 @@ from django.db import models
 class Token(models.Model):
     token = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='tokens')
+    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='tokens')
 
     def __str__(self):
         return self.token

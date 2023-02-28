@@ -105,7 +105,6 @@ def prioritization_validator(value, instance, file, index):
 
 
 def drawerlist_validator(value, instance, file, index):
-    # todo: add more validators
     options_id = [i.id for i in Option.objects.filter(question=instance.question)]
     for i in value:
         if i not in ['options']:

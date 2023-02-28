@@ -17,7 +17,7 @@ class LoginViewSet(CreateModelMixin, GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         headers = self.get_success_headers(serializer.data)
-        return Response(data={'response: با موفقیت انجام شد '}, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(data={'response: کد با موفقیت ارسال شد'}, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class SMSTokenCheckingViewSet(CreateModelMixin, GenericViewSet):

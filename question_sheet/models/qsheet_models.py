@@ -10,7 +10,6 @@ from user.models import Folder
 
 
 class QuestionSheet(models.Model):
-    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, auto_created=True)
     LANGUAGE_CHOICES = (
         ('ar', 'Arabic'),
         ('en', 'English'),
@@ -39,7 +38,7 @@ class Question(models.Model):
     has_question_num = models.BooleanField(default=False)
     media = models.FileField(upload_to='media/', null=True, blank=True,
                              validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'mp4'])])
-    parent_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,
+    parent_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True,
                                     limit_choices_to={'model__in': ('questionsheet', 'groupquestions')})
     parent_id = models.PositiveIntegerField()
     parent = GenericForeignKey('parent_type', 'parent_id')
@@ -65,7 +64,7 @@ class QuestionItem(models.Model):
 
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.SET_NULL, null=True)
     answer = models.JSONField(null=True, blank=True)
     file = models.FileField(upload_to='files/',
                             validators=[
@@ -73,7 +72,7 @@ class Answer(models.Model):
                                     allowed_extensions=['pdf', 'docx', 'doc', 'jpg', 'png', 'jpg', 'mp4', 'pptx',
                                                         'xlsx', 'mp3'])], null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-    answer_set = models.ForeignKey('AnswerSet', on_delete=models.CASCADE, related_name='answers')
+    answer_set = models.ForeignKey('AnswerSet', on_delete=models.SET_NULL, null=True, related_name='answers')
 
     def __str__(self):
         return self.question.id

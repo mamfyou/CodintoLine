@@ -7,22 +7,12 @@ import re
 class FolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Folder
-        fields = ['id', 'name', 'questionSheets', 'QuestionSheet']
-        extra_kwargs = {
-            'questionSheets': {'write_only': True},
-        }
+        fields = ['id', 'name', 'questionSheets']
 
-    QuestionSheet = QuestionSheetSerializer(many=True, read_only=True, source='questionSheets')
-
+    # TODO serializer for qsheet id, name
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
         return super().create(validated_data)
-
-    def validate(self, attrs):
-        for i in attrs.get('questionSheets'):
-            if i.owner != self.context['request'].user:
-                raise serializers.ValidationError("شما فقط میتوانید پرسشنامه هایی را اضافه کنید که برای شماست!")
-        return attrs
 
 
 class CodintoLineUserSerializer(serializers.ModelSerializer):

@@ -80,10 +80,8 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if validated_data.get('start_date') is None:
-            if validated_data.get('language') is None:
-                return QuestionSheet.objects.create(owner=self.context['user'], language='fa',
-                                                    start_date=datetime.date.today())
-            return QuestionSheet.objects.create(owner=self.context['user'], start_date=datetime.date.today())
+            return QuestionSheet.objects.create(owner=self.context['user'],
+                                                start_date=datetime.date.today(), **validated_data)
         return QuestionSheet.objects.create(owner=self.context['user'], **validated_data)
 
     def validate(self, attrs):
@@ -98,46 +96,25 @@ class QuestionSerializer(WritableNestedModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'title', 'options', 'description', 'is_required', 'has_question_num', 'media', 'parent_type',
-                  'parent_id', 'parent', 'question_number']
+                  'parent_id', 'question_number']
 
     options = OptionsSerializer(many=True, required=False)
-    parent = QuestionSheetSerializer(read_only=True)
 
-    def create(self, validated_data):
-        options_data = validated_data.pop('options')
-        question = Question.objects.create(**validated_data)
-        for option_data in options_data:
-            Option.objects.create(question=question, **option_data)
-        return question
 
     def validate(self, attrs):
-        if attrs.get('title') is None:
-            raise serializers.ValidationError('متن سوال اجباری است!')
-        elif attrs.get('title') == '':
+        if attrs.get('title') is None or attrs.get('title') == '':
             raise serializers.ValidationError('متن سوال اجباری است!')
         elif len(attrs.get('title')) < 5:
             raise serializers.ValidationError('متن سوال باید حداقل 5 کاراکتر باشد!')
         elif attrs.get('media') is not None:
-            if attrs.get('media').size > 20971520:
-                raise serializers.ValidationError('حجم فایل باید کمتر از 20 مگابایت باشد!')
-            elif attrs.get('media').content_type not in ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml',
-                                                         'image/webp', 'video/mp4', 'video/ogg', 'video/webm']:
-                raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
+            if attrs.get('media').size > 5242880:
+                raise serializers.ValidationError('حجم فایل باید کمتر از 5 مگابایت باشد!')
+            elif attrs.get('media').content_type not in ['image/jpeg', 'image/png', 'video/mp4', 'video/m4a']:
+                raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود! قابل قبول : png,jpeg,mp4,m4a')
         elif attrs.get('parent_type') is None:
             raise serializers.ValidationError('نوع والد سوال اجباری است!')
-        elif attrs.get('options') is not None:
-            for option in attrs.get('options'):
-                if option.get('name') is None:
-                    raise serializers.ValidationError(f' متن گزینه {option} اجباری است! ')
-                elif option.get('name') == '':
-                    raise serializers.ValidationError(f'متن گزینه {option} اجباری است!')
-                elif option.get('media') is not None:
-                    if option.get('media').size > 2097152:
-                        raise serializers.ValidationError('حجم فایل باید کمتر از 20 مگابایت باشد!')
-                    elif option.get('media').content_type not in ['image/jpeg', 'image/png', 'image/gif',
-                                                                  'image/svg+xml', 'image/webp', 'video/mp4',
-                                                                  'video/ogg', 'video/webm']:
-                        raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود!')
+        elif attrs.get('options') is None:
+            raise serializers.ValidationError('گزینه ها اجباری هستند!')
         return attrs
 
 
@@ -235,20 +212,20 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
 
     answers = AnswerSerializer(many=True, required=False)
 
-    def create(self, validated_data):
-        answer_set = None
-        if validated_data.get('answers') is not None:
-            answers_data = validated_data.pop('answers')
-            answers = []
-            answer_set = AnswerSet.objects.create(**validated_data)
-            for i in range(len(answers_data)):
-                answers.append(
-                    Answer.objects.create(answer=answers_data[i].get('answer'),
-                                          answer_set=answer_set,
-                                          question=answers_data[i]['question'],
-                                          file=answers_data[i].get('file')))
-            answer_set.answers.set(answers)
-        return answer_set
+    # def create(self, validated_data):
+    #     answer_set = None
+    #     if validated_data.get('answers') is not None:
+    #         answers_data = validated_data.pop('answers')
+    #         answers = []
+    #         answer_set = AnswerSet.objects.create(**validated_data)
+    #         for i in range(len(answers_data)):
+    #             answers.append(
+    #                 Answer.objects.create(answer=answers_data[i].get('answer'),
+    #                                       answer_set=answer_set,
+    #                                       question=answers_data[i]['question'],
+    #                                       file=answers_data[i].get('file')))
+    #         answer_set.answers.set(answers)
+    #     return answer_set
 
     def validate(self, data):
         file_flag = False

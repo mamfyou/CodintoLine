@@ -105,8 +105,8 @@ class FileSerializer(serializers.ModelSerializer):
         fields = ['id', 'max_size']
 
     def validate(self, attrs):
-        if attrs.get('max_size') >= 100000000:
-            raise serializers.ValidationError('حداکثر حجم فایل نمیتواند بیشتر از 100 مگابایت باشد!')
+        if attrs.get('max_size') >= 10485760:
+            raise serializers.ValidationError('حداکثر حجم فایل نمیتواند بیشتر از 10 مگابایت باشد!')
         return attrs
 
 
@@ -134,10 +134,10 @@ class GradingSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs.get('default_icon') is None and attrs.get('icon') is None:
             raise serializers.ValidationError('آیکون پیشفرض و آیکون نمیتواند هردو خالی باشد!')
-        elif attrs.get('icon') is not None and attrs.get('icon').size >= 3000000:
-            raise serializers.ValidationError('حجم آیکون نمیتواند بیشتر از 3 مگابایت باشد!')
-        elif attrs.get('icon') is not None and attrs.get('icon').content_type != 'PNG':
-            raise serializers.ValidationError('فرمت آیکون باید PNG باشد!')
+        elif attrs.get('icon') is not None and attrs.get('icon').size >= 1048576:
+            raise serializers.ValidationError('حجم آیکون نمیتواند بیشتر از 1 مگابایت باشد!')
+        elif attrs.get('icon') is not None and attrs.get('icon').content_type not in ['image/png', 'image/svg']:
+            raise serializers.ValidationError('فرمت آیکون باید PNG/SVG باشد!')
         return attrs
 
 
@@ -159,11 +159,6 @@ class MultiChoiceSerializer(serializers.ModelSerializer):
         if attrs.get('min_selection') is None or attrs.get('max_selection') is None:
             raise serializers.ValidationError('حداقل و حداکثر انتخاب نمیتواند خالی باشد!')
         elif attrs.get('min_selection') > attrs.get('max_selection'):
-            raise serializers.ValidationError('حداقل انتخاب نمیتواند بیشتر از حداکثر انتخاب باشد!')
-        return attrs
-
-    def validate(self, attrs):
-        if attrs.get('min_selection') > attrs.get('max_selection'):
             raise serializers.ValidationError('حداقل انتخاب نمیتواند بیشتر از حداکثر انتخاب باشد!')
         return attrs
 
@@ -209,6 +204,13 @@ class OptionsSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'order', 'picture']
 
     def validate(self, attrs):
-        if attrs.get('picture') is not None and attrs.get('picture').size >= 3000000:
-            raise serializers.ValidationError('حجم عکس نمیتواند بیشتر از 3 مگابایت باشد!')
+        if attrs.get('name') is None:
+            raise serializers.ValidationError(f' متن گزینه  اجباری است! ')
+        elif attrs.get('name') == '':
+            raise serializers.ValidationError(f'متن گزینه اجباری است!')
+        elif attrs.get('media') is not None:
+            if attrs.get('media').size > 5242880:
+                raise serializers.ValidationError('حجم فایل باید کمتر از 5 مگابایت باشد!')
+            elif attrs.get('media').content_type not in ['image/jpeg', 'image/png']:
+                raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود! قابل قبول : png, jpeg')
         return attrs

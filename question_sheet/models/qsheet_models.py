@@ -1,9 +1,7 @@
-import uuid
-
-from django.core.validators import FileExtensionValidator
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.validators import FileExtensionValidator
 from django.db import models
 
 from user.models import Folder
@@ -15,6 +13,8 @@ class QuestionSheet(models.Model):
         ('en', 'English'),
         ('fa', 'Persian'),
     )
+    # TODO delete null=true
+    uid = models.UUIDField(unique=True, null=True)
     language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default='fa')
     name = models.CharField(max_length=100, blank=True, default='Untitled')
     owner = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
@@ -69,8 +69,7 @@ class Answer(models.Model):
     file = models.FileField(upload_to='files/',
                             validators=[
                                 FileExtensionValidator(
-                                    allowed_extensions=['pdf', 'docx', 'doc', 'jpg', 'png', 'jpg', 'mp4', 'pptx',
-                                                        'xlsx', 'mp3'])], null=True, blank=True)
+                                    allowed_extensions=['pdf', 'docx', 'jpg', 'jpeg', 'png'])], null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     answer_set = models.ForeignKey('AnswerSet', on_delete=models.SET_NULL, null=True, related_name='answers')
 

@@ -1,5 +1,6 @@
 import datetime
 import json
+import uuid
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
@@ -71,18 +72,19 @@ class GenericMamfRelatedField(GenericSerializerMixin, serializers.JSONField, met
 class QuestionSheetSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionSheet
-        fields = ['id', 'language', 'name', 'start_date', 'end_date', 'duration',
+        fields = ['id', 'uid', 'language', 'name', 'start_date', 'end_date', 'duration',
                   'has_progress_bar', 'is_one_question_each_page', 'folder']
         extra_kwargs = {
             'start_date': {'required': False},
-            'language': {'required': False}
+            'language': {'required': False},
+            'uid': {'read_only': True}
         }
 
     def create(self, validated_data):
         if validated_data.get('start_date') is None:
             return QuestionSheet.objects.create(owner=self.context['user'],
-                                                start_date=datetime.date.today(), **validated_data)
-        return QuestionSheet.objects.create(owner=self.context['user'], **validated_data)
+                                                start_date=datetime.date.today(), uid=uuid.uuid4(), **validated_data)
+        return QuestionSheet.objects.create(owner=self.context['user'], uid=uuid.uuid4(), **validated_data)
 
     def validate(self, attrs):
         if attrs.get('folder') is None:
@@ -99,7 +101,6 @@ class QuestionSerializer(WritableNestedModelSerializer):
                   'parent_id', 'question_number']
 
     options = OptionsSerializer(many=True, required=False)
-
 
     def validate(self, attrs):
         if attrs.get('title') is None or attrs.get('title') == '':
@@ -212,21 +213,6 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
 
     answers = AnswerSerializer(many=True, required=False)
 
-    # def create(self, validated_data):
-    #     answer_set = None
-    #     if validated_data.get('answers') is not None:
-    #         answers_data = validated_data.pop('answers')
-    #         answers = []
-    #         answer_set = AnswerSet.objects.create(**validated_data)
-    #         for i in range(len(answers_data)):
-    #             answers.append(
-    #                 Answer.objects.create(answer=answers_data[i].get('answer'),
-    #                                       answer_set=answer_set,
-    #                                       question=answers_data[i]['question'],
-    #                                       file=answers_data[i].get('file')))
-    #         answer_set.answers.set(answers)
-    #     return answer_set
-
     def validate(self, data):
         file_flag = False
         answers_questions = []
@@ -250,3 +236,16 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
         if len(answers_questions) != len(set(answers_questions)):
             raise serializers.ValidationError('لطفا برای هر سوال فقط یک جواب ثبت کنید!')
         return data
+
+
+class QuestionSheetAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionSheet
+        fields = ['id', 'uid', 'language', 'name', 'start_date', 'end_date', 'duration',
+                  'has_progress_bar', 'is_one_question_each_page', 'folder']
+        extra_kwargs = {
+            'start_date': {'required': False},
+            'language': {'required': False},
+            'uid': {'read_only': True}
+        }
+        lookup_field = 'uid'

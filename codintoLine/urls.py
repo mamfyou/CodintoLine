@@ -22,7 +22,7 @@ from codintoLine import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('__debug__/', include('debug_toolbar.urls')),
-    path('api/qsheet/', include('question_sheet.urls')),
+    path('api/', include('question_sheet.urls')),
     path('api/panel/', include('user.urls')),
     path('api/auth/', include('core.urls')),
 ]

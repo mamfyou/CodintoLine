@@ -4,10 +4,10 @@ from question_sheet.views import *
 
 router = DefaultRouter()
 router2 = DefaultRouter()
-router.register('q', QuestionSheetViewSet, basename='question-sheet')
-router2.register('all', QuestionSheetAllViewSet, basename='questionSheetAll')
+router.register('qsheet', QuestionSheetViewSet, basename='question-sheet')
+router2.register('all', QuestionSheetAllViewSet, basename='question-sheet-all')
 
-nested_router = NestedDefaultRouter(router, 'q', lookup='questionSheet')
+nested_router = NestedDefaultRouter(router, 'qsheet', lookup='questionSheet')
 nested_router2 = NestedDefaultRouter(router2, 'all', lookup='questionSheetAll')
 
 nested_router2.register('question', QuestionItemAllViewSet, basename='questions')

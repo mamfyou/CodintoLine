@@ -58,11 +58,10 @@ class QuestionItemAllViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyMode
     permission_classes = [IsSuperUserOrOwnerOrIsActiveAll]
 
     def get_serializer_context(self):
-        return {'request': self.request, 'pk': self.kwargs.get('questionSheet_pk')}
+        return {'request': self.request, 'pk': self.kwargs['questionSheet_pk']}
 
 
 class QuestionSheetAllViewSet(ReadOnlyModelViewSet):
     queryset = QuestionSheet.objects.filter(is_active=True)
     serializer_class = QuestionSheetAllSerializer
     lookup_field = 'uid'
-

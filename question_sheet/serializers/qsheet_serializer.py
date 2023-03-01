@@ -114,8 +114,6 @@ class QuestionSerializer(WritableNestedModelSerializer):
                 raise serializers.ValidationError('فرمت فایل ارسالی پشتیبانی نمی شود! قابل قبول : png,jpeg,mp4,m4a')
         elif attrs.get('parent_type') is None:
             raise serializers.ValidationError('نوع والد سوال اجباری است!')
-        elif attrs.get('options') is None:
-            raise serializers.ValidationError('گزینه ها اجباری هستند!')
         return attrs
 
 
@@ -145,6 +143,8 @@ class QuestionItemSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         options = []
+        qsheet_obj = QuestionSheet.objects.get(id=self.context['pk'])
+        print(qsheet_obj.uid)
         question_data = validated_data.pop('question')
         field_object_data = validated_data.pop('field_object')
         field_type_data = validated_data.pop('field_type')
@@ -154,7 +154,7 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         the_class = SERIALIZER_DICT[field_type_data].Meta.model
         question = Question.objects.create(**question_data)
         if field_type_data == "ThanksPage":
-            field_object = the_class.objects.create(short_url_uuid=self.context['pk'], **field_object_data)
+            field_object = the_class.objects.create(short_url_uuid=str(qsheet_obj.uid), **field_object_data)
         elif field_type_data in ["DrawerList", "Prioritization", "MultiChoice"]:
             for option_data in options:
                 created_option.append(Option.objects.create(question=question, **option_data))
@@ -173,6 +173,9 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         elif data.get('field_type') not in ['DrawerList', 'MultiChoice', 'Prioritization'] and \
                 data.get('question').get('options') is not None:
             raise serializers.ValidationError('سوال انتخابی نمی تواند دارای گزینه باشد!')
+        elif data.get('field_type') in ['DrawerList', 'MultiChoice', 'Prioritization'] and \
+                data.get('question').get('options') is None:
+            raise serializers.ValidationError('گزینه ها اجباری هستند!')
         elif data.get('field_type') == "ThanksPage":
             if ThanksPage.objects.filter(short_url_uuid=self.context['pk']).exists():
                 raise serializers.ValidationError('صفحه تشکر برای این سوالنامه قبلا ایجاد شده است!')
@@ -205,6 +208,26 @@ class AnswerSerializer(serializers.ModelSerializer):
             'answer_set': {'read_only': True}
         }
 
+    def validate(self, attrs):
+        file_flag = False
+        answers_questions = []
+        question_item_object = QuestionItem.objects.get(question_id=attrs['question'].id)
+        if attrs.get('answer') is None and type(question_item_object.field_object) != File:
+            raise serializers.ValidationError('پاسخ اجباری است!')
+        elif attrs.get('question') is None:
+            raise serializers.ValidationError('سوال اجباری است!')
+        answers_questions.append(attrs.get('question'))
+        file_flag = type(question_item_object.field_object) == File
+        if file_flag is False and attrs.get('file') is not None:
+            raise serializers.ValidationError('ارسال فایل مجاز نمی باشد!')
+        elif type(question_item_object.field_object) in [Text, GroupQuestions, WelcomePage, ThanksPage]:
+            raise serializers.ValidationError('این سوال نمی تواند پاسخ داده شود!')
+        VALIDATORS_DICT[type(question_item_object.field_object)](attrs.get('answer'), question_item_object,
+                                                                 attrs.get('file'), len(answers_questions))
+        if len(answers_questions) != len(set(answers_questions)):
+            raise serializers.ValidationError('لطفا برای هر سوال فقط یک جواب ثبت کنید!')
+        return attrs
+
 
 class AnswerSetSerializer(WritableNestedModelSerializer):
     class Meta:
@@ -220,21 +243,6 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
             raise serializers.ValidationError('پاسخ ها اجباری است!')
         elif data.get('question_sheet') is None:
             raise serializers.ValidationError('سوالنامه اجباری است!')
-        for i in data['answers']:
-            object = QuestionItem.objects.get(question_id=i['question'].id)
-            if i.get('answer') is None and type(object.field_object) != File:
-                raise serializers.ValidationError('پاسخ اجباری است!')
-            elif i.get('question') is None:
-                raise serializers.ValidationError('سوال اجباری است!')
-            answers_questions.append(i.get('question'))
-            file_flag = type(object.field_object) == File
-            if file_flag is False and i.get('file') is not None:
-                raise serializers.ValidationError('ارسال فایل مجاز نمی باشد!')
-            elif type(object.field_object) in [Text, GroupQuestions, WelcomePage, ThanksPage]:
-                raise serializers.ValidationError('این سوال نمی تواند پاسخ داده شود!')
-            VALIDATORS_DICT[type(object.field_object)](i.get('answer'), object, i.get('file'), len(answers_questions))
-        if len(answers_questions) != len(set(answers_questions)):
-            raise serializers.ValidationError('لطفا برای هر سوال فقط یک جواب ثبت کنید!')
         return data
 
 

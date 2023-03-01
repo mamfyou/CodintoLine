@@ -84,7 +84,7 @@ class WelcomePage(models.Model):
 
 
 class ThanksPage(models.Model):
-    short_url_uuid = models.CharField(unique=True, editable=False, max_length=255)
+    short_url_uuid = models.CharField(unique=True, max_length=255)
     has_social_link = models.BooleanField(default=False)
     has_eitaa = models.BooleanField(default=False)
     has_telegram = models.BooleanField(default=False)

@@ -198,6 +198,7 @@ class ThanksPageSerializer(serializers.ModelSerializer):
         read_only_fields = ['short_url_uuid']
 
 
+
 class OptionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option

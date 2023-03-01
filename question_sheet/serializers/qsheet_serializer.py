@@ -246,6 +246,10 @@ class AnswerSetSerializer(WritableNestedModelSerializer):
         return data
 
 
+# This Serializer is necessary because
+# we need to set UUID as lookup field
+# so when user accesses the question sheet with below pattern
+# host/api/all/UUID/
 class QuestionSheetAllSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionSheet

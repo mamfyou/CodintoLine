@@ -50,7 +50,10 @@ class AnswerSetViewSet(ReadOnlyModelViewSet, CreateModelMixin):
     permission_classes = [IsSuperUserOrOwnerOrCreatePutOnly]
 
 
-class QuestionItemAllViewSet(ReadOnlyModelViewSet, CreateModelMixin, DestroyModelMixin):
+# These 2 Viewsets below are for accessing Question Sheets and Their Questions
+# In a Safe Read-Only Mode
+# The difference is anyone can access these views , and they only can read
+class QuestionItemAllViewSet(ReadOnlyModelViewSet):
     def get_queryset(self):
         return QuestionItem.objects.select_related('question').all()
 

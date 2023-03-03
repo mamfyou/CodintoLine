@@ -25,7 +25,7 @@ class QuestionSheet(models.Model):
     is_active = models.BooleanField(default=True)
     has_progress_bar = models.BooleanField(default=False)
     is_one_question_each_page = models.BooleanField(default=False)
-    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, related_name='questionSheets', null=True, blank=True)
+    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, related_name='questionSheetFolder', null=True, blank=True)
 
     def __str__(self):
         return self.name

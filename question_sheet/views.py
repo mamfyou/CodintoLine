@@ -1,6 +1,8 @@
+import datetime
+
+from django.db.models import Q
 from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.mixins import DestroyModelMixin, CreateModelMixin, UpdateModelMixin
+from rest_framework.mixins import DestroyModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
@@ -65,6 +67,10 @@ class QuestionItemAllViewSet(ReadOnlyModelViewSet):
 
 
 class QuestionSheetAllViewSet(ReadOnlyModelViewSet):
-    queryset = QuestionSheet.objects.filter(is_active=True)
+    def get_queryset(self):
+        return QuestionSheet.objects.filter(Q(is_active=True) & (
+                    Q(start_date__lte=datetime.datetime.today()) & Q(end_date__gte=datetime.datetime.today()) |
+                    Q(start_date__lte=datetime.datetime.today()) & Q(end_date=None)))
+
     serializer_class = QuestionSheetAllSerializer
     lookup_field = 'uid'

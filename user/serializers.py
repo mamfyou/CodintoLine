@@ -1,15 +1,24 @@
-from rest_framework import serializers
-from question_sheet.serializers.qsheet_serializer import QuestionSheetSerializer
-from user.models import Folder, CodintoLineUser
 import re
+
+from rest_framework import serializers
+
+from question_sheet.models.qsheet_models import QuestionSheet
+from user.models import Folder, CodintoLineUser
+
+
+class QuestionSheetFolderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionSheet
+        fields = ['id', 'uid', 'name']
 
 
 class FolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Folder
-        fields = ['id', 'name', 'questionSheets']
+        fields = ['id', 'name', 'questionSheetFolder']
 
-    # TODO serializer for qsheet id, name
+    questionSheetFolder = QuestionSheetFolderSerializer(read_only=True, many=True)
+
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
         return super().create(validated_data)

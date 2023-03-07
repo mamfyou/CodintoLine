@@ -23,6 +23,10 @@ class FolderSerializer(serializers.ModelSerializer):
         validated_data['owner'] = self.context['request'].user
         return super().create(validated_data)
 
+    def validate(self, attrs):
+        if Folder.objects.filter(name=attrs.get('name')).exists():
+            raise serializers.ValidationError('این پوشه هم اکنون وجود دارد!')
+        return attrs
 
 class CodintoLineUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,6 +35,6 @@ class CodintoLineUserSerializer(serializers.ModelSerializer):
         read_only_fields = ['is_active', 'is_staff', 'is_superuser']
 
     def validate(self, attrs):
-        if not re.match(r'^09\d{9}$', attrs['phone_number']):
+        if attrs.get('phone_number') is not None and not re.match(r'^09\d{9}$', attrs.get('phone_number')):
             raise serializers.ValidationError('فرمت شماره تلفن نادرست می باشد!')
         return attrs

@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.validators import FileExtensionValidator
 from django.db import models
 
+from question_sheet.models.question_models import GroupQuestions
 from user.models import Folder
 
 
@@ -13,7 +14,7 @@ class QuestionSheet(models.Model):
         ('en', 'English'),
         ('fa', 'Persian'),
     )
-    # TODO delete null=true
+
     uid = models.UUIDField(unique=True, null=True)
     language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default='fa')
     name = models.CharField(max_length=100, blank=True, default='Untitled')
@@ -25,7 +26,8 @@ class QuestionSheet(models.Model):
     is_active = models.BooleanField(default=True)
     has_progress_bar = models.BooleanField(default=False)
     is_one_question_each_page = models.BooleanField(default=False)
-    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, related_name='questionSheetFolder', null=True, blank=True)
+    folder = models.ForeignKey(Folder, on_delete=models.PROTECT, related_name='questionSheetFolder', null=True,
+                               blank=True)
 
     def __str__(self):
         return self.name
@@ -39,7 +41,8 @@ class Question(models.Model):
     media = models.FileField(upload_to='media/', null=True, blank=True,
                              validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'mp4'])])
     parent_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True,
-                                    limit_choices_to={'model__in': ('questionsheet', 'groupquestions')})
+                                    limit_choices_to={'model__in': ('questionsheet', 'groupquestions')},
+                                    related_query_name='questions')
     parent_id = models.PositiveIntegerField()
     parent = GenericForeignKey('parent_type', 'parent_id')
     question_number = models.DecimalField(max_digits=5, decimal_places=1, default=0)
@@ -49,10 +52,10 @@ class Question(models.Model):
 
 
 class QuestionItem(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_items')
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='question_items', related_query_name='question_items')
     field_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in': (
         'range', 'number', 'link', 'email', 'text', 'file', 'textwithanswer', 'drawerlist', 'grading', 'groupquestions',
-        'prioritization', 'multichoice', 'welcomepage', 'thankspage')})
+        'prioritization', 'multichoice', 'welcomepage', 'thankspage')}, related_query_name='question_itemss')
     field_object_id = models.PositiveIntegerField()
     field_object = GenericForeignKey('field_type', 'field_object_id')
 

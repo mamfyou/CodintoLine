@@ -1,17 +1,18 @@
 from django.contrib.auth import get_user_model
-from rest_framework import filters
+from rest_framework import filters, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
-from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, RetrieveModelMixin
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListModelMixin
 
 from user.models import Folder
 from user.serializers import FolderSerializer, CodintoLineUserSerializer
 from .search import search_fields
 from .permission import IsSuperuserOrGetPutSelfOnly
 
-class FolderViewSet(ModelViewSet):
+
+class FolderViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet, RetrieveModelMixin, ListModelMixin):
 
     def get_queryset(self):
         self.search_fields = search_fields(self.request.query_params.get('filter'))

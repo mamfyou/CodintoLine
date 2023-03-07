@@ -61,12 +61,9 @@ def grading_validator(value, instance, file, index):
         raise serializers.ValidationError(f'نمره نمیتواند خالی باشد در سوال {index} ام!')
     elif type(value['grade']) != int:
         raise serializers.ValidationError(f'نمره باید عددی باشد در سوال {index} ام!')
-    elif instance.start_grade_at is not None and int(value.get('grade')) > instance.end_grade_at:
+    elif int(value.get('grade')) > instance.end_grade_at:
         raise serializers.ValidationError(
             f'عدد ارسالی باید کمتر از حداکثر {instance.end_grade_at} باشد در سوال {index} ام!')
-    elif instance.end_grade_at is not None and int(value.get('grade')) < instance.start_grade_at:
-        raise serializers.ValidationError(
-            f'عدد ارسالی باید بیشتر از {instance.start_grade_at} باشد در سوال {index} ام!')
     return value
 
 
@@ -111,8 +108,6 @@ def drawerlist_validator(value, instance, file, index):
             raise serializers.ValidationError(f'الگوی پاسخ ارسالی نامعتبر است در سوال {index} ام!')
     if type(value['options']) != list:
         raise serializers.ValidationError(f'فرم ارسالی باید آرایه باشد در سوال {index} ام!')
-    elif len(value['options']) > 1 and instance.field_object.is_multiple_choice is False:
-        raise serializers.ValidationError(f'این سوال تنها یک گزینه را قبول میکند در سوال {index} ام!')
     elif len(
             value['options']) < instance.field_object.min_selection and instance.field_object.min_selection is not None:
         raise serializers.ValidationError(
@@ -162,7 +157,7 @@ def textwithanswer_validator(value, instance, file, index):
     elif validation_kind == 'fa_text':
         if not re.match(r'^[۱-۹آ-ی0-9]*$', value['answer_text']):
             raise serializers.ValidationError(f'فقط از حروف فارسی و اعداد استفاده کنید در سوال {index} ام!')
-    elif validation_kind in ['en_text', 'fa_text', 'regex']:
+    elif validation_kind in ['en_text', 'fa_text']:
         if len(value['answer_text']) < instance.validation.get('min_length'):
             raise serializers.ValidationError(
                 f'طول پاسخ باید حداقل {instance.validation.get("min_length")} باشد در سوال {index} ام!')
@@ -180,25 +175,31 @@ def textwithanswer_validator(value, instance, file, index):
             if value['answer_text'] > instance.validation.get('max_length'):
                 raise serializers.ValidationError(
                     f'پاسخ باید حداکثر {instance.validation.get("max_length")} باشد در سوال {index} ام!')
-    elif validation_kind == 'email':
-        if not re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', value['answer_text']):
-            raise serializers.ValidationError(f'پاسخ باید ایمیل باشد در سوال {index} ام!')
+    # elif validation_kind == 'email':
+    #     if not re.match(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', value['answer_text']):
+    #         raise serializers.ValidationError(f'پاسخ باید ایمیل باشد در سوال {index} ام!')
     elif validation_kind == 'cellphone':
         if not re.match(r'09[0-9]{9}', value['answer_text']):
             raise serializers.ValidationError(f'پاسخ باید شماره تلفن باشد در سوال {index} ام!')
-    elif validation_kind == 'date':
-        if not re.match(r'\d{4}-\d{2}-\d{2}', value['answer_text']):
-            raise serializers.ValidationError(f'پاسخ باید تاریخ باشد در سوال {index} ام!')
-    elif validation_kind == 'time':
-        if not re.match(r'\d{2}:\d{2}', value['answer_text']):
-            raise serializers.ValidationError(f'پاسخ باید زمان باشد در سوال {index} ام!')
+    # elif validation_kind == 'date':
+    #     if not re.match(r'\d{4}-\d{2}-\d{2}', value['answer_text']):
+    #         raise serializers.ValidationError(f'پاسخ باید تاریخ باشد در سوال {index} ام!')
+    # elif validation_kind == 'time':
+    #     if not re.match(r'\d{2}:\d{2}', value['answer_text']):
+    #         raise serializers.ValidationError(f'پاسخ باید زمان باشد در سوال {index} ام!')
     elif validation_kind == 'telephone':
         if not re.match(r'\d{2,4}-\d{7,8}', value['answer_text']):
             raise serializers.ValidationError(f'پاسخ باید تلفن باشد در سوال {index} ام!')
-    elif validation_kind == 'ip':
-        if not re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', value['answer_text']):
-            raise serializers.ValidationError(f'پاسخ باید آی پی باشد در سوال {index} ام!')
-    elif validation_kind == 'regex':
-        if not re.match(instance.validation.get('regex'), value['answer_text']):
-            raise serializers.ValidationError(f'پاسخ باید با الگوی مشخص شده مطابقت داشته باشد در سوال {index} ام!')
+    elif validation_kind == 'shamsi_date':
+        if not re.match('[1-9]\d{3}\/(0?[1-6]|1[0-2])\/(0?[1-9]|[1-2]\d|3[0-1])', value['answer_text']):
+            raise serializers.ValidationError(f'تاریخ شمسی فرمت نادرستی دارد...')
+    elif validation_kind == 'miladi_date':
+        if not re.match('\d{4}\/\d{2}\/\d{2}', value['answer_text']):
+            raise serializers.ValidationError(f'تاریخ میلادی فرمت نادرستی دارد...')
+    # elif validation_kind == 'ip':
+    #     if not re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', value['answer_text']):
+    #         raise serializers.ValidationError(f'پاسخ باید آی پی باشد در سوال {index} ام!')
+    # elif validation_kind == 'regex':
+    #     if not re.match(instance.validation.get('regex'), value['answer_text']):
+    #         raise serializers.ValidationError(f'پاسخ باید با الگوی مشخص شده مطابقت داشته باشد در سوال {index} ام!')
     return value

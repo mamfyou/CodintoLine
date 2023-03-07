@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 BUTTON_SHAPE = (('1', 'First'), ('2', 'Second'), ('3', 'Third'), ('4', 'Fourth'), ('5', 'Fifth'), ('6', 'Sixth'))
@@ -45,7 +46,7 @@ class DrawerList(models.Model):
     max_selection = models.PositiveIntegerField(null=True, blank=True)
     is_random_order = models.BooleanField(default=False)
     is_alphabetic_order = models.BooleanField(default=False)
-    is_multiple_choice = models.BooleanField(default=False)
+
 
 
 class Grading(models.Model):
@@ -60,7 +61,7 @@ class GroupQuestions(models.Model):
     button_shape = models.CharField(max_length=20, choices=BUTTON_SHAPE, null=True, blank=True)
     button_text = models.CharField(max_length=50, null=True, blank=True)
     is_random_order = models.BooleanField(default=False)
-
+    question_items = GenericRelation('QuestionItem', related_query_name='group_questions')
 
 class Prioritization(models.Model):
     is_random_order = models.BooleanField(default=False)

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
@@ -61,3 +62,16 @@ class IsSuperUserOrOwnerOrIsActiveAll(BasePermission):
                    qsheet_obj.owner == request.user or (
                            (qsheet_obj.start_date <= datetime.now().date()) and
                            request.method in SAFE_METHODS)
+
+
+class IsSuperUser(BasePermission):
+    def has_permission(self, request, view):
+        if view.kwargs.get('uid') is not None:
+            return True
+        return request.user.is_superuser
+
+
+class AccessToChildrenOnly(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        qsheet = ContentType.objects.get_for_model(QuestionSheet)
+        return obj.question.parent_id == int(view.kwargs['questionSheet_pk']) and obj.question.parent_type == qsheet

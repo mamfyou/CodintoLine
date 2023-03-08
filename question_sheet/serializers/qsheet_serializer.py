@@ -161,8 +161,7 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         if obj.field_type == group_type:
             children = QuestionItem.objects.filter(question__parent_type=group_type,
                                                    question__parent_id=obj.question.id)
-            data = QuestionItemSimpleSerializer(children, many=True).data
-            return data
+            return QuestionItemSimpleSerializer(children, many=True).data
         return None
 
     field_object = GenericMamfRelatedField({

@@ -15,6 +15,7 @@ from user.serializers import QuestionSheetFolderSerializer
 from .models.qsheet_models import QuestionSheet
 from .permissions import *
 
+
 class QuestionItemViewSet(ReadOnlyModelViewSet, UpdateModelMixin, CreateModelMixin, DestroyModelMixin):
     def get_queryset(self):
         qsheet = ContentType.objects.get_for_model(QuestionSheet)
@@ -69,7 +70,7 @@ class QuestionItemAllViewSet(ReadOnlyModelViewSet):
         qsheet_obj = QuestionSheet.objects.get(uid=self.kwargs['questionSheetAll_uid'])
         if self.kwargs.get('pk') is not None:
             return QuestionItem.objects.select_related('question').all()
-        return QuestionItem.objects.select_related('question').filter(
+        return QuestionItem.objects.select_related('question').prefetch_related('question__parent').filter(
             Q(question__parent_id=qsheet_obj.id) & Q(question__parent_type=qsheet))
 
     serializer_class = QuestionItemSerializer
@@ -88,3 +89,4 @@ class QuestionSheetAllViewSet(RetrieveModelMixin, GenericViewSet):
     serializer_class = QuestionSheetFolderSerializer
     lookup_field = 'uid'
     permission_classes = [IsSuperUser]
+

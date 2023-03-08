@@ -3,10 +3,10 @@ import datetime
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from rest_framework import status
-from rest_framework.mixins import DestroyModelMixin, CreateModelMixin, UpdateModelMixin
+from rest_framework.mixins import DestroyModelMixin, CreateModelMixin, UpdateModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericViewSet
 
 from question_sheet.models.qsheet_models import QuestionItem, AnswerSet
 from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer, \
@@ -33,7 +33,7 @@ class QuestionItemViewSet(ReadOnlyModelViewSet, UpdateModelMixin, CreateModelMix
         return {'request': self.request, 'pk': self.kwargs.get('questionSheet_pk')}
 
 
-class QuestionSheetViewSet(ModelViewSet):
+class QuestionSheetViewSet(RetrieveModelMixin, UpdateModelMixin, CreateModelMixin, GenericViewSet, DestroyModelMixin):
     def get_queryset(self):
         return QuestionSheet.objects.filter(is_active=True, owner=self.request.user)
 
@@ -68,16 +68,21 @@ class AnswerSetViewSet(ReadOnlyModelViewSet, CreateModelMixin):
 # The difference is anyone can access these views , and they only can read
 class QuestionItemAllViewSet(ReadOnlyModelViewSet):
     def get_queryset(self):
-        return QuestionItem.objects.select_related('question').all()
+        qsheet = ContentType.objects.get_for_model(QuestionSheet)
+        qsheet_obj = QuestionSheet.objects.get(uid=self.kwargs['questionSheetAll_uid'])
+        if self.kwargs.get('pk') is not None:
+            return QuestionItem.objects.select_related('question').all()
+        return QuestionItem.objects.select_related('question').filter(
+            Q(question__parent_id=qsheet_obj.id) & Q(question__parent_type=qsheet))
 
     serializer_class = QuestionItemSerializer
-    permission_classes = [IsSuperUserOrOwnerOrIsActiveAll]
+    permission_classes = [IsSuperUserOrOwnerOrIsActive, AccessToChildrenOnly]
 
     def get_serializer_context(self):
         return {'request': self.request, 'pk': self.kwargs['questionSheetAll_uid']}
 
 
-class QuestionSheetAllViewSet(ReadOnlyModelViewSet):
+class QuestionSheetAllViewSet(RetrieveModelMixin, GenericViewSet):
     def get_queryset(self):
         return QuestionSheet.objects.filter(Q(is_active=True) & (
                 Q(start_date__lte=datetime.datetime.today()) & Q(end_date__gte=datetime.datetime.today()) |

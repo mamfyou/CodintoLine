@@ -9,7 +9,7 @@ from user.models import Folder, CodintoLineUser
 class QuestionSheetFolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionSheet
-        fields = ['id', 'uid', 'name']
+        fields = ['uid', 'name']
 
 
 class FolderSerializer(serializers.ModelSerializer):

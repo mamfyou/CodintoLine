@@ -6,13 +6,14 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListModelMixin
 
+from question_sheet.models.qsheet_models import QuestionSheet
 from user.models import Folder
 from user.serializers import FolderSerializer, CodintoLineUserSerializer
 from .search import search_fields
 from .permission import IsSuperuserOrGetPutSelfOnly
 
 
-class FolderViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet, RetrieveModelMixin, ListModelMixin):
+class FolderViewSet(ModelViewSet):
 
     def get_queryset(self):
         self.search_fields = search_fields(self.request.query_params.get('filter'))
@@ -23,6 +24,13 @@ class FolderViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet, Retrieve
     permission_classes = [IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'questionSheets__name']
+
+    def destroy(self, request, *args, **kwargs):
+        for i in QuestionSheet.objects.filter(folder=self.kwargs['pk']):
+            i.is_active = False
+            i.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class UserViewSet(ReadOnlyModelViewSet, UpdateModelMixin, GenericViewSet):

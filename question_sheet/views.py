@@ -6,16 +6,15 @@ from rest_framework import status
 from rest_framework.mixins import DestroyModelMixin, CreateModelMixin, UpdateModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from question_sheet.models.qsheet_models import QuestionItem, AnswerSet
 from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer, \
     AnswerSetSerializer
 from user.serializers import QuestionSheetFolderSerializer
 from .models.qsheet_models import QuestionSheet
-from .models.question_models import GroupQuestions
 from .permissions import IsSuperUserOrOwnerOrIsActive, IsSuperUserOrOwnerOrCreatePutOnly, \
-    IsSuperUserOrOwnerOrIsActiveAll, IsSuperUser, AccessToChildrenOnly
+    IsSuperUser, AccessToChildrenOnly
 
 
 class QuestionItemViewSet(ReadOnlyModelViewSet, UpdateModelMixin, CreateModelMixin, DestroyModelMixin):

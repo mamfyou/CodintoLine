@@ -4,11 +4,10 @@ import uuid
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
-from drf_writable_nested import WritableNestedModelSerializer
 from generic_relations.relations import RenamedMethods
 from generic_relations.serializers import GenericSerializerMixin
 
-from question_sheet.models.qsheet_models import Question, QuestionItem, QuestionSheet, AnswerSet, Answer
+from question_sheet.models.qsheet_models import QuestionItem, QuestionSheet, AnswerSet, Answer
 from question_sheet.serializers.question_serializer import *
 from question_sheet.validators import *
 
@@ -149,64 +148,6 @@ class QuestionItemSimpleSerializer(serializers.ModelSerializer):
     field_type = serializers.CharField()
     question = QuestionSerializer()
 
-    def create(self, validated_data):
-        options = []
-        qsheet_obj = QuestionSheet.objects.get(id=self.context['pk'])
-        print(qsheet_obj.uid)
-        question_data = validated_data.pop('question')
-        field_object_data = validated_data.pop('field_object')
-        field_type_data = validated_data.pop('field_type')
-        if question_data.get('options') is not None:
-            options = question_data.pop('options')
-        created_option = []
-        the_class = SERIALIZER_DICT[field_type_data].Meta.model
-        question = Question.objects.create(**question_data)
-        if field_type_data == "ThanksPage":
-            field_object = the_class.objects.create(short_url_uuid=str(qsheet_obj.uid), **field_object_data)
-        elif field_type_data in ["DrawerList", "Prioritization", "MultiChoice"]:
-            for option_data in options:
-                created_option.append(Option.objects.create(question=question, **option_data))
-            question.options.set(created_option)
-            field_object = the_class.objects.create(**field_object_data)
-        else:
-            field_object = the_class.objects.create(**field_object_data)
-        question_item = QuestionItem.objects.create(question=question, field_object=field_object,
-                                                    field_type=ContentType.objects.get_for_model(
-                                                        SERIALIZER_DICT[field_type_data].Meta.model), **validated_data)
-        return question_item
-
-    def validate(self, data):
-        qsheet = QuestionSheet.objects.get(id=self.context['pk'])
-        if data.get('field_type') is None:
-            raise serializers.ValidationError('نوع سوال اجباری است!')
-        elif data.get('field_type') not in ['DrawerList', 'MultiChoice', 'Prioritization'] and \
-                data.get('question').get('options') is not None:
-            raise serializers.ValidationError('سوال انتخابی نمی تواند دارای گزینه باشد!')
-        elif data.get('field_type') in ['DrawerList', 'MultiChoice', 'Prioritization'] and \
-                data.get('question').get('options') is None:
-            raise serializers.ValidationError('گزینه ها اجباری هستند!')
-        elif data.get('field_type') == "ThanksPage":
-            if ThanksPage.objects.filter(short_url_uuid=qsheet.uid).exists():
-                raise serializers.ValidationError('صفحه تشکر برای این سوالنامه قبلا ایجاد شده است!')
-        elif data.get('field_type') == "WelcomePage":
-            if QuestionItem.objects.filter(question__parent_id=data['question']['parent_id'],
-                                           field_type=ContentType.objects.get_for_model(WelcomePage)).exists():
-                raise serializers.ValidationError('صفحه خوش آمدگویی برای این سوالنامه قبلا ایجاد شده است!')
-        elif data.get('field_type') not in SERIALIZER_DICT.keys():
-            raise serializers.ValidationError('نوع سوال اشتباه است!')
-        elif data.get('question') is None:
-            raise serializers.ValidationError('سوال اجباری است!')
-        elif data.get('field_type') in ['MultiChoice', 'DrawerList']:
-            if len(data.get('question').get('options')) < data.get('field_object').get('min_selection'):
-                raise serializers.ValidationError('حداقل تعیین شده بیشتر از تعداد گزینه ها است!')
-        elif data.get('field_type') in ['MultiChoice', 'DrawerList']:
-            if len(data.get('question').get('options')) > data.get('field_object').get('max_selection'):
-                raise serializers.ValidationError('حداکثر تعیین شده بیشتر از تعداد گزینه ها است!')
-        elif data.get('field_object') is None:
-            raise serializers.ValidationError('محتوای سوال اجباری است!')
-        SERIALIZER_DICT[data.get('field_type')].validate(data.get('field_object'))
-        return data
-
 
 class QuestionItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -300,14 +241,6 @@ class QuestionItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('محتوای سوال اجباری است!')
         SERIALIZER_DICT[data.get('field_type')].validate(data.get('field_object'))
         return data
-
-
-class GroupQuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GroupQuestions
-        fields = ['id', 'button_shape', 'button_text', 'is_random_order', 'question_item']
-
-    question_items = QuestionItemSerializer(source='question_items.all', many=True)
 
 
 class AnswerSerializer(serializers.ModelSerializer):

@@ -163,7 +163,7 @@ class QuestionItemSerializer(serializers.ModelSerializer):
                                                    question__parent_id=obj.question.id)
             data = QuestionItemSimpleSerializer(children, many=True).data
             return data
-        return "sdf"
+        return None
 
     field_object = GenericMamfRelatedField({
         TextWithAnswer: TxtWithAnsSerializer(),

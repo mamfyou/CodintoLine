@@ -13,9 +13,7 @@ from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer,
     AnswerSetSerializer
 from user.serializers import QuestionSheetFolderSerializer
 from .models.qsheet_models import QuestionSheet
-from .permissions import IsSuperUserOrOwnerOrIsActive, IsSuperUserOrOwnerOrCreatePutOnly, \
-    IsSuperUser, AccessToChildrenOnly
-
+from .permissions import *
 
 class QuestionItemViewSet(ReadOnlyModelViewSet, UpdateModelMixin, CreateModelMixin, DestroyModelMixin):
     def get_queryset(self):
@@ -75,7 +73,7 @@ class QuestionItemAllViewSet(ReadOnlyModelViewSet):
             Q(question__parent_id=qsheet_obj.id) & Q(question__parent_type=qsheet))
 
     serializer_class = QuestionItemSerializer
-    permission_classes = [IsSuperUserOrOwnerOrIsActive, AccessToChildrenOnly]
+    permission_classes = [IsSuperUserOrOwnerOrIsActiveAll, AccessToChildrenOnlyAll]
 
     def get_serializer_context(self):
         return {'request': self.request, 'pk': self.kwargs['questionSheetAll_uid']}

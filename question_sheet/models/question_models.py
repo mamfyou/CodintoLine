@@ -48,7 +48,6 @@ class DrawerList(models.Model):
     is_alphabetic_order = models.BooleanField(default=False)
 
 
-
 class Grading(models.Model):
     DEFAULT_ICON = (
         ('like', 'Like_Button'), ('star', 'Star_Button'), ('heart', 'Heart_Button'), ('tick', 'Tick_Button'))
@@ -61,7 +60,7 @@ class GroupQuestions(models.Model):
     button_shape = models.CharField(max_length=20, choices=BUTTON_SHAPE, null=True, blank=True)
     button_text = models.CharField(max_length=50, null=True, blank=True)
     is_random_order = models.BooleanField(default=False)
-    question_items = GenericRelation('QuestionItem', related_query_name='group_questions')
+
 
 class Prioritization(models.Model):
     is_random_order = models.BooleanField(default=False)

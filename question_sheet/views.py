@@ -1,6 +1,5 @@
 import datetime
 
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.mixins import DestroyModelMixin, CreateModelMixin, UpdateModelMixin, RetrieveModelMixin
@@ -12,7 +11,6 @@ from question_sheet.models.qsheet_models import QuestionItem, AnswerSet
 from question_sheet.serializers.qsheet_serializer import QuestionItemSerializer, QuestionSheetSerializer, \
     AnswerSetSerializer
 from user.serializers import QuestionSheetFolderSerializer
-from .models.qsheet_models import QuestionSheet
 from .permissions import *
 
 

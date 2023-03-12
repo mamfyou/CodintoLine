@@ -158,7 +158,7 @@ class QuestionItemSerializer(serializers.ModelSerializer):
         group_type = ContentType.objects.get_for_model(GroupQuestions)
         if obj.field_type == group_type:
             children = QuestionItem.objects.filter(question__parent_type=group_type,
-                                                   question__parent_id=obj.question.id)
+                                                   question__parent_id=obj.id)
             return QuestionItemSimpleSerializer(children, many=True).data
         return None
 

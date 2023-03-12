@@ -1,6 +1,8 @@
 import datetime
 
 from django.db.models import Q
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import status
 from rest_framework.mixins import DestroyModelMixin, CreateModelMixin, UpdateModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -27,6 +29,18 @@ class QuestionItemViewSet(ReadOnlyModelViewSet, UpdateModelMixin, CreateModelMix
 
     def get_serializer_context(self):
         return {'request': self.request, 'pk': self.kwargs.get('questionSheet_pk')}
+
+    @method_decorator(cache_page(5 * 60))
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class QuestionSheetViewSet(RetrieveModelMixin, UpdateModelMixin, CreateModelMixin, GenericViewSet, DestroyModelMixin):
@@ -88,3 +102,14 @@ class QuestionSheetAllViewSet(RetrieveModelMixin, GenericViewSet):
     lookup_field = 'uid'
     permission_classes = [IsSuperUser]
 
+    @method_decorator(cache_page(5 * 60))
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

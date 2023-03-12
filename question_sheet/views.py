@@ -81,8 +81,8 @@ class QuestionItemAllViewSet(ReadOnlyModelViewSet):
 class QuestionSheetAllViewSet(RetrieveModelMixin, GenericViewSet):
     def get_queryset(self):
         return QuestionSheet.objects.filter(Q(is_active=True) & (
-                Q(start_date__lte=datetime.datetime.today()) & Q(end_date__gte=datetime.datetime.today()) |
-                Q(start_date__lte=datetime.datetime.today()) & Q(end_date=None)))
+                Q(start_date__lte=datetime.today()) & Q(end_date__gte=datetime.today()) |
+                Q(start_date__lte=datetime.today()) & Q(end_date=None)))
 
     serializer_class = QuestionSheetFolderSerializer
     lookup_field = 'uid'

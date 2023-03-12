@@ -90,10 +90,8 @@ class QuestionSheetSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('پوشه نمیتواند خالی باشد!')
         elif attrs['folder'].owner != self.context['user']:
             raise serializers.ValidationError('شما نمیتوانید پوشه ای که متعلق به شما نیست را انتخاب کنید!')
-        print(self.context['pk'])
-        if self.context['pk2'] is not None:
-            if attrs.get('name') is None or attrs.get('name') == "":
-                raise serializers.ValidationError('نام اجباری است!')
+        elif attrs.get('name') is None or attrs.get('name') == "":
+            raise serializers.ValidationError('نام اجباری است!')
         return attrs
 
 

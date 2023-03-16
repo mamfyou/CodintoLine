@@ -13,6 +13,9 @@ class LoginSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
 
     def create(self, validated_data):
+        token_queryset = Token.objects.filter(user__phone_number=validated_data['phone_number'])
+        if token_queryset.exists():
+            token_queryset.delete()
         user = get_user_model().objects.get_or_create(phone_number=validated_data['phone_number'])
         send_sms.delay(validated_data['phone_number'], user[0].id)
         return validated_data

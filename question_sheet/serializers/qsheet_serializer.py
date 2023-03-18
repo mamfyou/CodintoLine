@@ -235,6 +235,9 @@ class QuestionItemSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('حداکثر تعیین شده بیشتر از تعداد گزینه ها است!')
         elif data.get('field_object') is None:
             raise serializers.ValidationError('محتوای سوال اجباری است!')
+        elif data['question']['parent_type'] != ContentType.objects.get_for_model(GroupQuestions) and \
+                data['question']['parent_id'] != int(self.context['pk']):
+            raise serializers.ValidationError('آیدی پرسشنامه باید با آیدی موجود در یو آر ال یکی باشد!')
         SERIALIZER_DICT[data.get('field_type')].validate(data.get('field_object'))
         return data
 

@@ -27,7 +27,7 @@ SECRET_KEY = dotenv_values(".env")['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['185.141.134.116', 'codinto-line.web97.ir', 'localhost']
 
 # Application definition
 
@@ -97,10 +97,6 @@ DATABASES = {
     }
 }
 
-INTERNAL_IPS = [
-    '127.0.0.1',
-]
-
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -135,9 +131,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 AUTH_USER_MODEL = 'user.CodintoLineUser'
+
 STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_ROOT = BASE_DIR / 'static'
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -160,11 +162,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '20/minute',
-        'user': '30/minute'
-    }
-
+    'anon': '20/minute',
+    'user': '30/minute'
 }
 
 CELERY_BROKER_URL = 'redis://localhost:6379/1'

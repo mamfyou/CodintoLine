@@ -158,13 +158,14 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication'],
-    'DEFAULT_THROTTLE_CLASSES': [
+    'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
-    ],
-    'anon': '20/minute',
-    'user': '30/minute'
-}
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '20/minute',
+        'user': '40/minute',
+    }
 
 CELERY_BROKER_URL = 'redis://localhost:6379/1'
 

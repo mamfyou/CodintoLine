@@ -166,6 +166,7 @@ REST_FRAMEWORK = {
         'anon': '20/minute',
         'user': '40/minute',
     }
+}
 
 CELERY_BROKER_URL = 'redis://localhost:6379/1'
 

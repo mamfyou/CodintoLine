@@ -21,10 +21,10 @@ class CustomUserManager(BaseUserManager):
 
 
 class CodintoLineUser(AbstractUser):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    username = models.CharField(max_length=255, unique=False, null=True, blank=True)
-    password = models.CharField(max_length=100, null=True, blank=True)
+    first_name = models.CharField(max_length=50, verbose_name='نام')
+    last_name = models.CharField(max_length=50, verbose_name='نام خانوادگی')
+    username = models.CharField(max_length=255, unique=False, null=True, blank=True, verbose_name='نام کاربری')
+    password = models.CharField(max_length=100, null=True, blank=True, verbose_name='رمز عبور')
     phone_number = models.CharField(max_length=12, validators=[
         RegexValidator(regex='^09[0-9]{9}$', message='شماره تلفن همراه وارد شده صحیح نمی باشد')],
                                     verbose_name='تلفن همراه', unique=True)
@@ -39,8 +39,8 @@ class CodintoLineUser(AbstractUser):
 
 
 class Folder(models.Model):
-    name = models.CharField(max_length=100)
-    owner = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, related_name='folderOwner', null=True)
+    name = models.CharField(max_length=100, verbose_name='نام پوشه')
+    owner = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, related_name='folderOwner', null=True, verbose_name='مالک پوشه')
 
     def __str__(self):
         return self.name

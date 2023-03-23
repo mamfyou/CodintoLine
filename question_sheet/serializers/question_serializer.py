@@ -46,7 +46,7 @@ class TxtWithAnsSerializer(serializers.ModelSerializer):
 class RangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Range
-        fields = ['id', 'start_range_at', 'end_range_at', 'first_tag', 'mid_tag', 'end_tag', 'has_zero']
+        fields = ['id', 'start_range_at', 'end_range_at', 'right_tag', 'mid_tag', 'left_tag', 'has_zero']
 
     def validate(self, attrs):
         is_number_regex = re.compile(r'^\d+$')

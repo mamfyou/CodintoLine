@@ -30,7 +30,7 @@ class QuestionItemViewSet(ReadOnlyModelViewSet, UpdateModelMixin, CreateModelMix
     def get_serializer_context(self):
         return {'request': self.request, 'pk': self.kwargs.get('questionSheet_pk')}
 
-    @method_decorator(cache_page(5 * 60))
+    # @method_decorator(cache_page(5 * 60))
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 

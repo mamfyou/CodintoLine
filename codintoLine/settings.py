@@ -27,7 +27,7 @@ SECRET_KEY = dotenv_values(".env")['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['185.141.134.116', 'codinto-line.web97.ir', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -113,6 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+INTERNAL_IPS = [
+    '127.0.0.1'
 ]
 
 # Internationalization
